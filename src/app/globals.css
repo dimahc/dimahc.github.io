@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: 255 255 255;
+  --color-foreground: 0 0 0;
+  --color-muted: 115 115 115;
+  --color-border: 229 229 229;
+}
+
+.dark {
+  --color-background: 10 10 10;
+  --color-foreground: 255 255 255;
+  --color-muted: 163 163 163;
+  --color-border: 38 38 38;
+}
+
+@layer base {
+  body {
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+    font-feature-settings: normal;
+    font-variation-settings: normal;
+  }
+
+  /* Respect user's reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Improve focus visibility for keyboard navigation */
+  *:focus-visible {
+    outline: 2px solid rgb(96, 165, 250);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Screen reader only class */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .sr-only.focus\:not-sr-only:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+}
+
+@layer components {
+  .nav-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    color: rgb(var(--color-muted));
+    transition: color 150ms;
+    font-size: 18px;
+  }
+
+  .nav-link:hover {
+    color: rgb(var(--color-foreground));
+  }
+
+  .nav-link::before {
+    content: '';
+    position: absolute;
+    left: -2rem;
+    top: 50%;
+    width: 1.5rem;
+    height: 1px;
+    background-color: rgb(var(--color-foreground));
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 150ms;
+  }
+
+  .nav-link:hover::before {
+    opacity: 1;
+  }
+
+  .tech-icon {
+    width: 2rem;
+    height: 2rem;
+    opacity: 0.8;
+    transition: all 300ms;
+  }
+
+  .tech-icon:hover {
+    opacity: 1;
+  }
+
+  .get-in-touch {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    border: 1px solid rgb(var(--color-border));
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    transition: all 300ms;
+  }
+
+  .get-in-touch:hover {
+    background-color: rgba(96, 165, 250, 0.1);
+    border-color: rgb(96, 165, 250);
+    color: rgb(96, 165, 250);
+    transform: scale(1.05);
+  }
+}
