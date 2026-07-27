@@ -1,0 +1,82 @@
+{
+  "about": {
+    "summary": "Go and Python backend engineer with 4+ years of experience on distributed data platforms. Real-time ingestion, microservices, event-driven architectures. I work on both pipeline design and production operations: on-call duty, incident resolution, observability.",
+    "paragraphs": [
+      "Go and Python backend engineer with 4+ years on distributed data platforms — real-time ingestion, microservices, event-driven architectures. Currently at Univers (QoS Energy) building data pipelines for renewable energy monitoring; previously at NumoData (EXFO) on telecom network analytics.",
+      "I care about system design, observability, and keeping production healthy. Comfortable moving between pipeline architecture and on-call operations."
+    ],
+    "title": "About Me"
+  },
+  "common": {
+    "copyright": "© {{year}} {{name}}. All rights reserved.",
+    "skipToContent": "Skip to main content"
+  },
+  "contact": {
+    "cta": "Open to discussing backend engineering opportunities, system architecture challenges, or potential collaborations. Let's build something great together.",
+    "email": "Email",
+    "form": {
+      "emailPlaceholder": "Your email",
+      "errorMessage": "Failed to send message. Please try again.",
+      "messagePlaceholder": "Your message",
+      "namePlaceholder": "Your name",
+      "sendButton": "Send Message",
+      "sending": "Sending...",
+      "successMessage": "Message sent successfully! I'll get back to you soon."
+    },
+    "formTitle": "Get in Touch",
+    "linkedin": "LinkedIn",
+    "location": "Location",
+    "locationText": "Rennnes, France",
+    "title": "Contact",
+    "validation": {
+      "emailInvalid": "Please enter a valid email",
+      "emailRequired": "Email is required",
+      "messageMinLength": "Message must be at least 10 characters",
+      "messageRequired": "Message is required",
+      "nameRequired": "Name is required"
+    }
+  },
+  "experience": {
+    "skillsLabel": "Skills",
+    "title": "Work Experience"
+  },
+  "export": {
+    "label": "Resume",
+    "sections": {
+      "about": "Professional Summary",
+      "cloudDevOps": "Cloud & DevOps",
+      "dataMessaging": "Data & Messaging",
+      "education": "Education",
+      "experience": "Professional Experience",
+      "languages": "Languages",
+      "observability": "Observability",
+      "projects": "Selected Projects",
+      "technologies": "Technical Skills"
+    },
+    "tooltip": "Download as PDF"
+  },
+  "hero": {
+    "cta": "Open to collaborating on challenging backend projects, discussing system architecture, or exploring new opportunities.",
+    "getInTouch": "Get in touch",
+    "subtitle": "Distributed Systems • Data Pipelines • Cloud Infrastructure",
+    "tagline": "Building scalable backend solutions with Go, Python, and modern cloud technologies.",
+    "title": "Backend Software Engineer"
+  },
+  "language": {
+    "switchTo": "Switch to French",
+    "switchToEnglish": "Switch to English",
+    "switchToFrench": "Passer au français"
+  },
+  "navigation": {
+    "about": "About",
+    "ariaNavigateTo": "Navigate to {{section}} section",
+    "contact": "Contact",
+    "experience": "Experience",
+    "projects": "Projects",
+    "resume": "Resume"
+  },
+  "projects": {
+    "skillsLabel": "Skills",
+    "title": "Professional and Academic Projects"
+  }
+}

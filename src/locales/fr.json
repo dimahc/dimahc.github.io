@@ -1,0 +1,82 @@
+{
+  "about": {
+    "paragraphs": [
+      "Ingénieur backend Go et Python avec 4+ ans sur des plateformes de données distribuées — ingestion temps réel, microservices, architectures event-driven. Actuellement chez Univers (QoS Energy) sur des pipelines de données pour le monitoring d'énergies renouvelables ; précédemment chez NumoData (EXFO) sur l'analytics réseau télécom.",
+      "J'attache de l'importance à la conception de systèmes, l'observabilité et la tenue en production. À l'aise aussi bien sur l'architecture des pipelines que sur l'astreinte opérationnelle."
+    ],
+    "summary": "Ingénieur backend Go et Python avec 4+ ans d'expérience sur des plateformes de données distribuées. Ingestion temps réel, microservices, architectures event-driven. J'interviens aussi bien sur la conception de pipelines que sur leur tenue en production : astreinte, résolution d'incidents, observabilité.",
+    "title": "À propos de moi"
+  },
+  "common": {
+    "copyright": "© {{year}} {{name}}. Tous droits réservés.",
+    "skipToContent": "Aller au contenu principal"
+  },
+  "contact": {
+    "cta": "Ouvert aux discussions sur les opportunités d'ingénierie backend, les défis d'architecture système, ou les collaborations potentielles. Construisons quelque chose de génial ensemble.",
+    "email": "Email",
+    "form": {
+      "emailPlaceholder": "Votre email",
+      "errorMessage": "Échec de l'envoi. Veuillez réessayer.",
+      "messagePlaceholder": "Votre message",
+      "namePlaceholder": "Votre nom",
+      "sendButton": "Envoyer",
+      "sending": "Envoi en cours...",
+      "successMessage": "Message envoyé avec succès! Je vous répondrai bientôt."
+    },
+    "formTitle": "Contactez-moi",
+    "linkedin": "LinkedIn",
+    "location": "Localisation",
+    "locationText": "Rennes, France",
+    "title": "Contact",
+    "validation": {
+      "emailInvalid": "Veuillez entrer un email valide",
+      "emailRequired": "L'email est requis",
+      "messageMinLength": "Le message doit contenir au moins 10 caractères",
+      "messageRequired": "Le message est requis",
+      "nameRequired": "Le nom est requis"
+    }
+  },
+  "experience": {
+    "skillsLabel": "Compétences",
+    "title": "Expériences professionnelles"
+  },
+  "export": {
+    "label": "CV",
+    "sections": {
+      "about": "Résumé Professionnel",
+      "cloudDevOps": "Cloud & DevOps",
+      "dataMessaging": "Data & Messaging",
+      "education": "Formation",
+      "experience": "Expérience Professionnelle",
+      "languages": "Langages",
+      "observability": "Observabilité",
+      "projects": "Projets Sélectionnés",
+      "technologies": "Compétences Techniques"
+    },
+    "tooltip": "Télécharger en PDF"
+  },
+  "hero": {
+    "cta": "Ouvert à la collaboration sur des projets backend stimulants, aux discussions sur l'architecture système, ou à l'exploration de nouvelles opportunités.",
+    "getInTouch": "Me contacter",
+    "subtitle": "Systèmes Distribués • Pipelines de Données • Infrastructure Cloud",
+    "tagline": "Construction de solutions backend évolutives avec Go, Python et technologies cloud modernes.",
+    "title": "Ingénieur Logiciel Backend"
+  },
+  "language": {
+    "switchTo": "Passer à l'anglais",
+    "switchToEnglish": "Switch to English",
+    "switchToFrench": "Passer au français"
+  },
+  "navigation": {
+    "about": "À propos",
+    "ariaNavigateTo": "Naviguer vers la section {{section}}",
+    "contact": "Contact",
+    "experience": "Expérience",
+    "projects": "Projets",
+    "resume": "CV"
+  },
+  "projects": {
+    "skillsLabel": "Compétences",
+    "title": "Projets Professionnels et Académiques"
+  }
+}
