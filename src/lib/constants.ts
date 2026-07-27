@@ -22,10 +22,10 @@ export const PERSONAL_INFO = {
 } as const;
 
 export const NAVIGATION_SECTIONS = [
-  { id: "about", labelEN: "About", labelFR: "À propos" },
+  { id: "now", labelEN: "Now", labelFR: "Actuel" },
   { id: "experience", labelEN: "Experience", labelFR: "Expérience" },
-  { id: "projects", labelEN: "Projects", labelFR: "Projets" },
-  { id: "resume", labelEN: "Resume", labelFR: "CV" },
+  { id: "oss", labelEN: "Open source", labelFR: "Open source" },
+  { id: "writing", labelEN: "Writing", labelFR: "Écrits" },
   { id: "contact", labelEN: "Contact", labelFR: "Contact" },
 ] as const;
 

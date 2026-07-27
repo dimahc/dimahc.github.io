@@ -33,7 +33,7 @@ export default function ResumeExperience({ title, skillsLabel, jobs }: ResumeExp
                     ) : (
                         <p className="description">{job.description}</p>
                     )}
-                    <div className="skills"><strong>{skillsLabel}:</strong> {job.skills}</div>
+                    <div className="skills"><strong>{skillsLabel}:</strong> {job.skills.join(', ')}</div>
                 </div>
             ))}
         </div>

@@ -1,0 +1,36 @@
+---
+title: "Concevoir des pipelines d'ingestion temps réel qui restent sains"
+description: "Leçons tirées de la construction d'une ingestion événementielle pour de la télémétrie d'énergies renouvelables : backpressure, idempotence, et rendre les problèmes de qualité de données bruyants."
+date: "2025-03-02"
+tags: ["Python", "Événementiel", "Observabilité"]
+---
+
+L'ingestion temps réel paraît simple sur un schéma : une source, une file, un consommateur, une base. En production, cela devient une négociation entre débit, justesse et la réalité désordonnée de systèmes amont qui tombent au pire moment.
+
+## Le backpressure est une fonctionnalité, pas un échec
+
+Quand l'aval ralentit, vous avez trois options : jeter, bufferiser ou bloquer. Faire comme si cela n'arrivait jamais n'en est pas une. Concevoir une stratégie de backpressure explicite — files bornées, alertes sur le retard des consommateurs, dégradation gracieuse — c'est ce qui empêche un pipeline de prendre du retard en silence.
+
+```python
+async def consume(stream, sink, max_inflight=256):
+    semaphore = asyncio.Semaphore(max_inflight)
+    async for batch in stream:
+        async with semaphore:
+            await sink.write(batch)  # concurrence bornée = backpressure naturel
+```
+
+## L'idempotence sauve votre astreinte
+
+Une livraison "au moins une fois" signifie que les doublons ne sont pas un peut-être, mais un quand. Chaque chemin d'écriture doit être idempotent — un upsert sur un identifiant stable, pas un insert aveugle. Cette seule décision transforme une catégorie d'incidents de 3 h du matin en non-événement.
+
+## Rendre les problèmes de qualité de données bruyants
+
+La pire panne de pipeline est la silencieuse : la donnée continue de circuler, mais elle est subtilement fausse. Les dashboards semblent corrects jusqu'à ce que quelqu'un en aval remarque des chiffres qui ne collent pas.
+
+- Valider au bord et rejeter tôt.
+- Émettre des métriques sur les enregistrements rejetés, pas seulement acceptés.
+- Alerter sur l'*absence* de données attendues, pas uniquement sur les erreurs.
+
+> Un pipeline qui échoue bruyamment est un bon pipeline. Un pipeline qui ment en silence est un risque.
+
+L'objectif n'a jamais été zéro incident — c'était une détection rapide et une reprise ennuyeuse. Construisez pour le jour où ça casse, car ça cassera.

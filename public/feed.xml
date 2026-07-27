@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>dimahc.dev</title>
+    <link>https://dimahc.dev</link>
+    <description>Notes on distributed systems, observability, and things that broke in production.</description>
+    <language>en</language>
+    <lastBuildDate>Mon, 27 Jul 2026 21:52:30 GMT</lastBuildDate>
+    <atom:link href="https://dimahc.dev/feed.xml" rel="self" type="application/rss+xml"/>
+        <item>
+      <title>Owning an open source Terraform provider</title>
+      <link>https://dimahc.dev/writing/owning-an-open-source-terraform-provider</link>
+      <guid isPermaLink="true">https://dimahc.dev/writing/owning-an-open-source-terraform-provider</guid>
+      <description>What I learned maintaining the Cloud Avenue provider end to end — from resource design to breaking-change discipline and community support.</description>
+      <pubDate>Wed, 18 Jun 2025 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Designing real-time ingestion pipelines that stay healthy</title>
+      <link>https://dimahc.dev/writing/designing-real-time-ingestion-pipelines</link>
+      <guid isPermaLink="true">https://dimahc.dev/writing/designing-real-time-ingestion-pipelines</guid>
+      <description>Lessons from building event-driven ingestion for renewable-energy telemetry: backpressure, idempotency, and making data-quality problems loud.</description>
+      <pubDate>Sun, 02 Mar 2025 00:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

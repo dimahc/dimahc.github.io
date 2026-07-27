@@ -7,22 +7,34 @@
  *
  * Run:  bun run scripts/generate-resume.ts
  *        pnpm generate-resume
+ *
+ * Flags:
+ *   --dry-run   Preview output without writing files
+ *   --verbose   Log detailed information
  */
 
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync, writeFileSync, existsSync } from "fs";
 import { join } from "path";
 
-// ── Imports use relative paths (no @/ alias outside Next.js) ──────────────────
+// ── CLI flags ────────────────────────────────────────────────
+const args = process.argv.slice(2);
+const dryRun = args.includes("--dry-run");
+const verbose = args.includes("--verbose");
+
+// ── Imports use relative paths (no @/ alias outside Next.js) ──
 import { educationContent } from "../src/content/education";
 import { experienceContent } from "../src/content/experience";
 import { getTechsByResumeCategory } from "../src/content/technologies";
 import { PERSONAL_INFO } from "../src/lib/constants";
 
-// Inline locale strings needed for the resume (avoids i18n runtime dependency)
+type Lang = "en" | "fr";
+
+// ── Inline locale strings needed for the resume ──────────────
 const LABELS = {
   en: {
     titlePrimary: "Backend Engineer",
     titleSecondary: "Data Systems \\& Cloud",
+    summaryTitle: "About",
     summary:
       "Software engineer working at the intersection of data, cloud infrastructure, and distributed systems. After several years building large-scale data processing architectures (IoT, telecom, renewable energy), I now focus on Infrastructure as Code components around Terraform, with a growing contribution to open source projects.",
     sectionExperience: "Professional Experience",
@@ -34,11 +46,12 @@ const LABELS = {
     labelData: "Data \\& Messaging",
     labelObs: "Observability",
     spokenLanguages:
-      "\\textbf{French} \\textcolor{lighttext}{(native)} \\quad | \\quad\n\\textbf{English} \\textcolor{lighttext}{(fluent)} \\quad | \\quad\n\\textbf{Bambara} \\textcolor{lighttext}{(native)}",
+      "\\textbf{French} \\textcolor{lighttext}{(native)} \\quad |\n\\textbf{English} \\textcolor{lighttext}{(fluent)} \\quad |\n\\textbf{Bambara} \\textcolor{lighttext}{(native)}",
   },
   fr: {
     titlePrimary: "Backend Engineer",
     titleSecondary: "Syst\\`emes Data \\& Cloud",
+    summaryTitle: "À propos",
     summary:
       "Ing\\'enieur logiciel \\'evoluant \\`a l'intersection de la data, des infrastructures cloud et des syst\\`emes distribu\\'es. Apr\\`es plusieurs ann\\'ees sur des architectures de traitement de donn\\'ees \\`a grande \\'echelle (IoT, t\\'el\\'ecoms, \\'energies renouvelables), je travaille aujourd'hui sur des composants d'Infrastructure as Code autour de Terraform, avec une contribution progressive \\`a des projets open source.",
     sectionExperience: "Exp\\'erience Professionnelle",
@@ -50,13 +63,11 @@ const LABELS = {
     labelData: "Data \\& Messaging",
     labelObs: "Observabilit\\'e",
     spokenLanguages:
-      "\\textbf{Fran\\c{c}ais} \\textcolor{lighttext}{(natif)} \\quad | \\quad\n\\textbf{Anglais} \\textcolor{lighttext}{(courant)} \\quad | \\quad\n\\textbf{Bambara} \\textcolor{lighttext}{(natif)}",
+      "\\textbf{Fran\\c{c}ais} \\textcolor{lighttext}{(natif)} \\quad |\n\\textbf{Anglais} \\textcolor{lighttext}{(courant)} \\quad |\n\\textbf{Bambara} \\textcolor{lighttext}{(natif)}",
   },
 } as const;
 
-// ── LaTeX escaping ────────────────────────────────────────────────────────────
-// Escapes plain-text strings for safe insertion into LaTeX.
-// Does NOT escape strings that are already LaTeX (e.g. label strings above).
+// ── LaTeX escaping ────────────────────────────────────────────
 function esc(text: string): string {
   return (
     text
@@ -70,67 +81,83 @@ function esc(text: string): string {
       .replace(/\}/g, "\\}")
       .replace(/~/g, "\\textasciitilde{}")
       .replace(/\^/g, "\\textasciicircum{}")
-      // Typographic dashes: — → ---, – → --
       .replace(/—/g, "---")
       .replace(/–/g, "--")
   );
 }
 
-// ── Experience section builder ────────────────────────────────────────────────
-function buildExperience(lang: "en" | "fr"): string {
-  const jobs = experienceContent[lang].jobs.filter(
-    (j) => j.achievementGroups && j.achievementGroups.length > 0,
-  );
+// ── Skill tags builder ────────────────────────────────────────
+function buildSkillTags(names: string[]): string {
+  return names
+    .map((name) => `\\skilltag{${esc(name)}}`)
+    .join("\\hspace{4pt}");
+}
 
-  return jobs
-    .map((job, idx) => {
-      const box = idx === 0 ? "currentjob" : "pastjob";
-      const periodStyle =
-        idx === 0
-          ? `\\colorbox{primary}{\\textcolor{white}{\\small\\bfseries\\textsf{\\ ${esc(job.period)}\\ }}}`
-          : `{\\small\\textsf{${esc(job.period)}}}`;
-
-      const skillTags = job.skills
-        .split(",")
-        .map((s) => s.trim())
-        .map((s, i) =>
-          i === 0 ? `\\primarytag{${esc(s)}}` : `\\skilltag{${esc(s)}}`,
-        )
-        .join(" ");
-
-      const groups = job.achievementGroups!.map((group) => {
-        const header = group.title
-          ? `\\textbf{\\textcolor{secondary}{${esc(group.title)}}}\n`
-          : "";
-        const items = group.items
-          .map((item) => `\\item ${esc(item)}`)
-          .join("\n");
-        return `${header}\\begin{itemize}\n${items}\n\\end{itemize}`;
-      });
-
-      const groupsJoined = groups.join("\n\n\\vspace{6pt}\n");
-
-      return `\\begin{${box}}
-\\textbf{\\large\\textcolor{darktext}{${esc(job.title)}}} \\hfill ${periodStyle}\\\\[2pt]
-\\textcolor{${idx === 0 ? "primary" : "secondary"}}{\\textbf{${esc(job.company)}}} \\textcolor{lighttext}{| ${esc(job.location)}}
-
-\\vspace{4pt}
-
-${groupsJoined}
-
-\\vspace{3pt}
-${skillTags}
-\\end{${box}}`;
+// ── Achievement groups builder ────────────────────────────────
+function buildAchievementGroups(
+  groups: Array<{ title: string; items: string[] }>,
+): string {
+  return groups
+    .map((group) => {
+      const header = group.title
+        ? `\\textbf{\\textcolor{secondary}{${esc(group.title)}}}\n`
+        : "";
+      const items = group.items
+        .map((item) => `\\item ${esc(item)}`)
+        .join("\n");
+      return `${header}\\begin{itemize}\n${items}\n\\end{itemize}`;
     })
+    .join("\n\n\\vspace{6pt}\n");
+}
+
+// ── Experience card builder ───────────────────────────────────
+function renderJob(job: {
+  title: string;
+  company: string;
+  location: string;
+  period: string;
+  current: boolean;
+  skills: string[];
+  achievementGroups: Array<{ title: string; items: string[] }>;
+}): string {
+  const cardType = job.current ? "current" : "default";
+  const periodStyle = job.current
+    ? `\\colorbox{primary}{\\textcolor{white}{\\small\\bfseries\\textsf{\\ ${esc(job.period)}\\ }}}`
+    : `{\\small\\textsf{${esc(job.period)}}}`;
+
+  const skillTags = job.skills
+    .map((s, i) =>
+      i === 0 ? `\\primarytag{${esc(s)}}` : `\\skilltag{${esc(s)}}`,
+    )
+    .join("");
+
+  const groupsContent = buildAchievementGroups(job.achievementGroups);
+
+  return `\\begin{experiencecard}{${cardType}}
+\\jobtitle{${esc(job.title)}}
+\\jobcompany{${esc(job.company)}}
+\\jobdate{${esc(job.period)}}
+\\joblocation{${esc(job.location)}}
+
+${groupsContent}
+
+${skillTags}
+
+\\end{experiencecard}`;
+}
+
+// ── Experience section builder ────────────────────────────────
+function buildExperience(lang: Lang): string {
+  return experienceContent[lang]
+    .jobs.filter((j) => j.achievementGroups && j.achievementGroups.length > 0)
+    .map((job) => renderJob(job))
     .join("\n\n");
 }
 
-// ── Education section builder ─────────────────────────────────────────────────
-function buildEducation(lang: "en" | "fr"): string {
+// ── Education section builder ─────────────────────────────────
+function buildEducation(lang: Lang): string {
   const entries = educationContent[lang].entries;
 
-  // Split into main education rows and any supplementary single-entry rows
-  // The first row uses a tabularx spanning two columns; subsequent ones too.
   const rows = entries
     .map(
       (edu) =>
@@ -144,17 +171,38 @@ ${rows}
 \\end{tabularx}`;
 }
 
-// ── Skill tags builder ────────────────────────────────────────────────────────
-function buildSkillTags(names: string[]): string {
-  return names.map((n) => `\\skilltag{${esc(n)}}`).join(" ");
+// ── Validate that all template placeholders are replaced ──────
+function findUnreplacedPlaceholders(
+  template: string,
+  rendered: string,
+): string[] {
+  const matches = rendered.match(/\{\{[A-Z_]+\}\}/g);
+  return matches || [];
 }
 
-// ── Main rendering ────────────────────────────────────────────────────────────
-const templatePath = join(import.meta.dir, "../resume/template.tex");
-const template = readFileSync(templatePath, "utf-8");
-const techCategories = getTechsByResumeCategory();
+// ── Template renderer ─────────────────────────────────────────
+function renderTemplate(
+  template: string,
+  vars: Record<string, string>,
+): string {
+  let result = template;
+  for (const [key, value] of Object.entries(vars)) {
+    result = result.replaceAll(`{{${key}}}`, value);
+  }
+  return result;
+}
 
-function render(lang: "en" | "fr"): string {
+// ── Main rendering ────────────────────────────────────────────
+const templatePath = join(import.meta.dirname, "../resume/template.tex");
+
+if (!existsSync(templatePath)) {
+  console.error(`Error: Template file not found at ${templatePath}`);
+  process.exit(1);
+}
+
+const template = readFileSync(templatePath, "utf-8");
+
+function render(lang: Lang): string {
   const L = LABELS[lang];
   const replacements: Record<string, string> = {
     NAME: esc(PERSONAL_INFO.name.full),
@@ -164,43 +212,66 @@ function render(lang: "en" | "fr"): string {
     PHONE: esc(PERSONAL_INFO.phone),
     EMAIL: esc(PERSONAL_INFO.email.professional),
     WEBSITE: "dimahc.dev",
-    LINKEDIN: "linkedin.com/in/abdoul-hamid-coulibaly",
+    LINKEDIN: PERSONAL_INFO.social.linkedin.replace("https://", ""),
+    GITHUB: PERSONAL_INFO.social.github.replace("https://github.com/", ""),
     SUMMARY: L.summary,
     SECTION_EXPERIENCE: L.sectionExperience,
     SECTION_SKILLS: L.sectionSkills,
     SECTION_EDUCATION: L.sectionEducation,
     SECTION_LANGUAGES: L.sectionLanguages,
-    LABEL_LANGUAGES: L.labelLanguages,
-    LABEL_CLOUD: L.labelCloud,
-    LABEL_DATA: L.labelData,
-    LABEL_OBS: L.labelObs,
-    SKILLS_LANGUAGES: buildSkillTags(techCategories["Languages"]),
-    SKILLS_CLOUD: buildSkillTags(techCategories["Cloud & DevOps"]),
-    SKILLS_DATA: buildSkillTags(techCategories["Data & Messaging"]),
-    SKILLS_OBS: buildSkillTags(techCategories["Observability"]),
-    EXPERIENCE_CONTENT: buildExperience(lang),
     EDUCATION_CONTENT: buildEducation(lang),
     SPOKEN_LANGUAGES: L.spokenLanguages,
   };
 
-  return Object.entries(replacements).reduce(
-    (tpl, [key, value]) => tpl.replaceAll(`{{${key}}}`, value),
-    template,
-  );
+  return renderTemplate(template, replacements);
 }
 
-const outputDir = join(import.meta.dir, "../resume");
+const outputDir = join(import.meta.dirname, "../resume");
 
-const files: Array<{ lang: "en" | "fr"; name: string }> = [
+const files: Array<{ lang: Lang; name: string }> = [
   { lang: "en", name: "CV_Backend_Eng_Abdoul_Hamid_Coulibaly_EN.tex" },
   { lang: "fr", name: "CV_Backend_Eng_Abdoul_Hamid_Coulibaly_FR.tex" },
 ];
 
+let success = true;
+
 for (const { lang, name } of files) {
-  const output = render(lang);
-  const outPath = join(outputDir, name);
-  writeFileSync(outPath, output, "utf-8");
-  console.log(`✓ Generated ${name}`);
+  try {
+    const output = render(lang);
+
+    const unreplaced = findUnreplacedPlaceholders(template, output);
+    if (unreplaced.length > 0) {
+      console.error(
+        `Error: Unreplaced placeholders in ${name}: ${unreplaced.join(", ")}`,
+      );
+      success = false;
+      continue;
+    }
+
+    if (dryRun) {
+      console.log(`[dry-run] Would write ${name} (${output.length} bytes)`);
+      if (verbose) {
+        console.log(output);
+      }
+      continue;
+    }
+
+    const outPath = join(outputDir, name);
+    writeFileSync(outPath, output, "utf-8");
+    console.log(`✓ Generated ${name}`);
+  } catch (err) {
+    console.error(`Error generating ${name}: ${err}`);
+    success = false;
+  }
+}
+
+if (dryRun) {
+  console.log("\n[dry-run] No files written.");
+}
+
+if (!success) {
+  console.error("\nDone with errors.");
+  process.exit(1);
 }
 
 console.log("\nDone. Run scripts/compile-resume.sh to produce PDFs.");

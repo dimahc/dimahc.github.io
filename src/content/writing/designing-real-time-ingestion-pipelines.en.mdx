@@ -1,0 +1,36 @@
+---
+title: "Designing real-time ingestion pipelines that stay healthy"
+description: "Lessons from building event-driven ingestion for renewable-energy telemetry: backpressure, idempotency, and making data-quality problems loud."
+date: "2025-03-02"
+tags: ["Python", "Event-driven", "Observability"]
+---
+
+Real-time ingestion looks simple in a diagram: a source, a queue, a consumer, a database. In production it becomes a negotiation between throughput, correctness, and the messy reality of upstream systems that go down at the worst possible time.
+
+## Backpressure is a feature, not a failure
+
+When downstream slows, you have three options: drop, buffer, or block. Pretending it never happens is not one of them. Designing an explicit backpressure strategy — bounded queues, consumer lag alerts, and graceful degradation — is what keeps a pipeline from silently falling behind.
+
+```python
+async def consume(stream, sink, max_inflight=256):
+    semaphore = asyncio.Semaphore(max_inflight)
+    async for batch in stream:
+        async with semaphore:
+            await sink.write(batch)  # bounded concurrency = natural backpressure
+```
+
+## Idempotency saves your on-call rotation
+
+At-least-once delivery means duplicates are not a maybe, they are a when. Every write path should be idempotent — an upsert keyed on a stable identifier, not a blind insert. This single decision turns a class of 3 a.m. incidents into a non-event.
+
+## Make data-quality problems loud
+
+The worst pipeline failure is the silent one: data keeps flowing, but it is subtly wrong. Dashboards look fine until someone downstream notices numbers that do not add up.
+
+- Validate at the edge and reject early.
+- Emit metrics on rejected records, not just accepted ones.
+- Alert on the *absence* of expected data, not only on errors.
+
+> A pipeline that fails loudly is a good pipeline. A pipeline that lies quietly is a liability.
+
+The goal was never zero incidents — it was fast detection and boring recovery. Build for the day things break, because they will.

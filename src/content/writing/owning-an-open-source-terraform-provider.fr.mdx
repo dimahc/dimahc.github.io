@@ -1,0 +1,46 @@
+---
+title: "Porter un provider Terraform open source"
+description: "Ce que j'ai appris en maintenant le provider Cloud Avenue de bout en bout — du design des ressources à la discipline sur les breaking changes, jusqu'au support communautaire."
+date: "2025-06-18"
+tags: ["Go", "Terraform", "Open Source"]
+---
+
+Maintenir un provider Terraform, c'est un mélange étrange de client d'API, de réflexion produit et de conception de contrat sur le long terme. Chaque ressource que vous exposez devient une promesse : les utilisateurs vont l'inscrire dans leur state et s'attendre à ce qu'elle continue de fonctionner à travers les montées de version.
+
+## Le provider est un contrat d'API
+
+Un schéma de provider n'est pas juste du code — c'est une interface publique. Renommer un attribut ou changer son type est un breaking change pour chaque module qui en dépend. Cette contrainte change la façon de concevoir.
+
+- Modéliser les ressources autour du modèle mental de l'utilisateur, pas de la réponse brute de l'API.
+- Privilégier les changements additifs ; déprécier avant de supprimer.
+- Traiter le schéma comme une surface versionnée, parce que c'en est une.
+
+```go
+func resourceVDC() *schema.Resource {
+    return &schema.Resource{
+        CreateContext: resourceVDCCreate,
+        ReadContext:   resourceVDCRead,
+        UpdateContext: resourceVDCUpdate,
+        DeleteContext: resourceVDCDelete,
+        Schema: map[string]*schema.Schema{
+            "name": {
+                Type:     schema.TypeString,
+                Required: true,
+                ForceNew: true,
+            },
+        },
+    }
+}
+```
+
+## Le Read, c'est le plus dur
+
+Tout le monde se concentre sur le `Create`, mais c'est dans le `Read` que vit la justesse. C'est lui qui réconcilie le monde réel avec le state, et un read bâclé produit des diffs parasites sans fin. Je passe l'essentiel de mon énergie de revue à m'assurer que le read reflète précisément la réalité.
+
+## L'observabilité pour du code d'infrastructure
+
+Même pour un outil en ligne de commande, l'observabilité compte : logs structurés, messages d'erreur clairs, et tests d'acceptation qui tournent contre de vraies APIs. Quand un utilisateur ouvre un ticket, la différence entre un correctif en cinq minutes et une enquête de cinq jours tient presque toujours à la qualité des signaux qu'on s'est laissés.
+
+> Un bon outillage d'infrastructure est ennuyeux, volontairement. Prévisible vaut mieux que malin.
+
+Porter ce provider m'a appris que la chose la plus précieuse à livrer, c'est la stabilité — la fonctionnalité que personne ne remarque parce que rien n'a cassé.

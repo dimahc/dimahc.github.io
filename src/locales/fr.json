@@ -19,6 +19,7 @@
       "errorMessage": "Échec de l'envoi. Veuillez réessayer.",
       "messagePlaceholder": "Votre message",
       "namePlaceholder": "Votre nom",
+      "retryButton": "Réessayer",
       "sendButton": "Envoyer",
       "sending": "Envoi en cours...",
       "successMessage": "Message envoyé avec succès! Je vous répondrai bientôt."
@@ -38,7 +39,11 @@
   },
   "experience": {
     "skillsLabel": "Compétences",
-    "title": "Expériences professionnelles"
+    "title": "Expérience",
+    "tag": "02 — parcours",
+    "now": "actuel",
+    "before": "avant",
+    "earlier": "précédent"
   },
   "export": {
     "label": "CV",
@@ -55,17 +60,42 @@
     },
     "tooltip": "Télécharger en PDF"
   },
+  "footer": {
+    "cta": "Ouvert aux problèmes d'infrastructure intéressants",
+    "email": "email",
+    "github": "github",
+    "linkedin": "linkedin",
+    "resume": "CV"
+  },
   "hero": {
+    "eyebrow": "d'astreinte, et ça me va",
+    "title": "Ingénieur backend<br>pour des systèmes qui <em>tournent.</em>",
+    "lede": "Abdoul Hamid — Ingénieur Go & Python, 4+ ans sur des plateformes de données distribuées : ingestion temps réel, services event-driven, et un provider Terraform open source par-dessus le marché.",
+    "ctaWork": "Voir le travail",
+    "ctaLog": "Lire le journal",
     "cta": "Ouvert à la collaboration sur des projets backend stimulants, aux discussions sur l'architecture système, ou à l'exploration de nouvelles opportunités.",
     "getInTouch": "Me contacter",
     "subtitle": "Systèmes Distribués • Pipelines de Données • Infrastructure Cloud",
-    "tagline": "Construction de solutions backend évolutives avec Go, Python et technologies cloud modernes.",
-    "title": "Ingénieur Logiciel Backend"
+    "tagline": "Construction de solutions backend évolutives avec Go, Python et technologies cloud modernes."
   },
   "language": {
     "switchTo": "Passer à l'anglais",
     "switchToEnglish": "Switch to English",
     "switchToFrench": "Passer au français"
+  },
+  "mission": {
+    "tag": "01 — actuel",
+    "title": "Mission en cours",
+    "role": "INETUM — en mission chez Orange Business",
+    "status": "actif",
+    "description": "Propriétaire technique du provider Terraform open source Cloud Avenue — cycle de vie des ressources, cohérence d'état, et les cas limites qui cassent un plan à 2h du matin."
+  },
+  "nav": {
+    "now": "Actuel",
+    "experience": "Expérience",
+    "oss": "Open source",
+    "writing": "Écrits",
+    "contact": "Contact"
   },
   "navigation": {
     "about": "À propos",
@@ -75,8 +105,21 @@
     "projects": "Projets",
     "resume": "CV"
   },
+  "oss": {
+    "tag": "03 — open source",
+    "title": "Cloud Avenue provider",
+    "project": "terraform-provider-cloudavenue",
+    "description": "Un provider Terraform open source pour provisionner l'infrastructure sur Cloud Avenue. Focus sur la correction face à la dérive, des diagnostics clairs, et un comportement stable en production.",
+    "cta": "voir sur github →"
+  },
   "projects": {
     "skillsLabel": "Compétences",
     "title": "Projets Professionnels et Académiques"
+  },
+  "writing": {
+    "tag": "04 — écrits",
+    "title": "Le journal",
+    "emptyTitle": "Pas encore de publications",
+    "emptyDesc": "C'est ici qu'atterriront les notes sur les systèmes distribués, l'observabilité, et les trucs qui ont cassé en production. Premier article à venir."
   }
 }

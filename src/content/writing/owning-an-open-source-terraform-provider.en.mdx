@@ -1,0 +1,46 @@
+---
+title: "Owning an open source Terraform provider"
+description: "What I learned maintaining the Cloud Avenue provider end to end — from resource design to breaking-change discipline and community support."
+date: "2025-06-18"
+tags: ["Go", "Terraform", "Open Source"]
+---
+
+Maintaining a Terraform provider is a strange mix of API client work, product thinking, and long-term contract design. Every resource you expose becomes a promise: users will write it into their state and expect it to keep working across upgrades.
+
+## The provider is an API contract
+
+A provider schema is not just code — it is a public interface. Renaming an attribute or changing its type is a breaking change for every module that depends on it. That constraint changes how you design.
+
+- Model resources around the user's mental model, not the raw API response.
+- Prefer additive changes; deprecate before you remove.
+- Treat the schema as versioned surface area, because it is.
+
+```go
+func resourceVDC() *schema.Resource {
+    return &schema.Resource{
+        CreateContext: resourceVDCCreate,
+        ReadContext:   resourceVDCRead,
+        UpdateContext: resourceVDCUpdate,
+        DeleteContext: resourceVDCDelete,
+        Schema: map[string]*schema.Schema{
+            "name": {
+                Type:     schema.TypeString,
+                Required: true,
+                ForceNew: true,
+            },
+        },
+    }
+}
+```
+
+## Read is the hard part
+
+Everyone focuses on `Create`, but `Read` is where correctness lives. It is what reconciles the world with state, and a sloppy read produces endless spurious diffs. I spend most of my review energy making sure read reflects reality precisely.
+
+## Observability for infrastructure code
+
+Even for a CLI-facing tool, observability matters: structured logs, clear error messages, and acceptance tests that run against real APIs. When a user files an issue, the difference between a five-minute fix and a five-day investigation is almost always the quality of the signals you left yourself.
+
+> Good infrastructure tooling is boring on purpose. Predictable beats clever.
+
+Owning the provider taught me that the most valuable thing you can ship is stability — the feature nobody notices because nothing broke.

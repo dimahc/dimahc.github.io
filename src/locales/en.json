@@ -19,6 +19,7 @@
       "errorMessage": "Failed to send message. Please try again.",
       "messagePlaceholder": "Your message",
       "namePlaceholder": "Your name",
+      "retryButton": "Try again",
       "sendButton": "Send Message",
       "sending": "Sending...",
       "successMessage": "Message sent successfully! I'll get back to you soon."
@@ -38,7 +39,11 @@
   },
   "experience": {
     "skillsLabel": "Skills",
-    "title": "Work Experience"
+    "title": "Experience",
+    "tag": "02 — path",
+    "now": "now",
+    "before": "before that",
+    "earlier": "earlier"
   },
   "export": {
     "label": "Resume",
@@ -55,17 +60,42 @@
     },
     "tooltip": "Download as PDF"
   },
+  "footer": {
+    "cta": "Open to interesting infrastructure problems",
+    "email": "email",
+    "github": "github",
+    "linkedin": "linkedin",
+    "resume": "resume"
+  },
   "hero": {
+    "eyebrow": "on call, and fine with it",
+    "title": "Backend engineer<br>for systems that <em>keep flowing.</em>",
+    "lede": "Abdoul Hamid — Go & Python engineer, 4+ years on distributed data platforms: real-time ingestion, event-driven services, and the odd open source Terraform provider.",
+    "ctaWork": "See the work",
+    "ctaLog": "Read the log",
     "cta": "Open to collaborating on challenging backend projects, discussing system architecture, or exploring new opportunities.",
     "getInTouch": "Get in touch",
     "subtitle": "Distributed Systems • Data Pipelines • Cloud Infrastructure",
-    "tagline": "Building scalable backend solutions with Go, Python, and modern cloud technologies.",
-    "title": "Backend Software Engineer"
+    "tagline": "Building scalable backend solutions with Go, Python, and modern cloud technologies."
   },
   "language": {
     "switchTo": "Switch to French",
     "switchToEnglish": "Switch to English",
     "switchToFrench": "Passer au français"
+  },
+  "mission": {
+    "tag": "01 — now",
+    "title": "Current mission",
+    "role": "INETUM — on assignment at Orange Business",
+    "status": "active",
+    "description": "Owning the Cloud Avenue open source Terraform provider — resource lifecycle, state consistency, and the edge cases that break a plan at 2am."
+  },
+  "nav": {
+    "now": "Now",
+    "experience": "Experience",
+    "oss": "Open source",
+    "writing": "Writing",
+    "contact": "Contact"
   },
   "navigation": {
     "about": "About",
@@ -75,8 +105,21 @@
     "projects": "Projects",
     "resume": "Resume"
   },
+  "oss": {
+    "tag": "03 — open source",
+    "title": "Cloud Avenue provider",
+    "project": "terraform-provider-cloudavenue",
+    "description": "An open source Terraform provider for provisioning infrastructure on Cloud Avenue. Focused on correctness under drift, clear diagnostics, and staying boring in production.",
+    "cta": "view on github →"
+  },
   "projects": {
     "skillsLabel": "Skills",
     "title": "Professional and Academic Projects"
+  },
+  "writing": {
+    "tag": "04 — writing",
+    "title": "The log",
+    "emptyTitle": "No dispatches yet",
+    "emptyDesc": "This is where notes on distributed systems, observability, and things that broke in production will land. First post incoming."
   }
 }

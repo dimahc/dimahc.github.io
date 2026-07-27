@@ -14,10 +14,20 @@ export const experienceContent: TranslatedContent<ExperienceContent> = {
         company: "INETUM (Orange Business)",
         location: "Rennes, France",
         period: "June 2026 - Present",
+        current: true,
         description:
           "Technical owner of the Cloud Avenue open source Terraform provider, published on the Terraform Registry. Driving the project's evolution to support new platform capabilities: developing Terraform resources and data sources, improving code quality, fixing bugs, and evolving the associated Go SDK. Collaborating with Product and API teams to design Terraform interfaces consistent with platform services. Contributing to architecture, code reviews, testing, documentation, and the lifecycle of an open source project.",
-        skills:
-          "Go, Terraform, HCL, OpenAPI, AI Agentic Development, Git, GitHub Actions, CI/CD, Open Source",
+        skills: [
+          "Go",
+          "Terraform",
+          "HCL",
+          "OpenAPI",
+          "AI Agentic Development",
+          "Git",
+          "GitHub Actions",
+          "CI/CD",
+          "Open Source",
+        ],
         achievementGroups: [
           {
             title: "Cloud Avenue Terraform Provider",
@@ -43,8 +53,19 @@ export const experienceContent: TranslatedContent<ExperienceContent> = {
         period: "November 2023 - March 2026",
         description:
           "Go and Python backend engineer on a SaaS platform monitoring renewable energy power plants. Design and operation of high-throughput data ingestion pipelines, event-driven architectures, and resilient connectors for heterogeneous sources. On-call duty, incident resolution, and observability.",
-        skills:
-          "Go, Python, Ruby, RabbitMQ, NATS, PostgreSQL, Kubernetes, Azure, GitOps, Prometheus, Grafana",
+        skills: [
+          "Go",
+          "Python",
+          "Ruby",
+          "RabbitMQ",
+          "NATS",
+          "PostgreSQL",
+          "Kubernetes",
+          "Azure",
+          "GitOps",
+          "Prometheus",
+          "Grafana",
+        ],
         achievementGroups: [
           {
             title: "Architecture & Data Ingestion",
@@ -78,8 +99,17 @@ export const experienceContent: TranslatedContent<ExperienceContent> = {
         period: "October 2021 - October 2023",
         description:
           "Backend engineer on the ASA platform, a telecom network metrics analysis and visualization system processing millions of metrics per minute. Built Go services, analytical query pipelines, and owned a usage monitoring feature end-to-end.",
-        skills:
-          "Go, Python, Kafka, Apache Druid, AWS, Prometheus, Grafana, Helm, Kubernetes",
+        skills: [
+          "Go",
+          "Python",
+          "Kafka",
+          "Apache Druid",
+          "AWS",
+          "Prometheus",
+          "Grafana",
+          "Helm",
+          "Kubernetes",
+        ],
         achievementGroups: [
           {
             title: "Backend Development",
@@ -111,8 +141,15 @@ export const experienceContent: TranslatedContent<ExperienceContent> = {
         period: "May 2021 - August 2021",
         description:
           "Developed an ingestion pipeline from the Apidae tourism database to the Akeneo PIM, handling bidirectional synchronization and media management for a white-label cartographic SaaS platform.",
-        skills:
-          "PHP, Laravel, Docker, Kubernetes, Akeneo, Cloudinary, REST API",
+        skills: [
+          "PHP",
+          "Laravel",
+          "Docker",
+          "Kubernetes",
+          "Akeneo",
+          "Cloudinary",
+          "REST API",
+        ],
         achievementGroups: [
           {
             title: "",
@@ -132,8 +169,16 @@ export const experienceContent: TranslatedContent<ExperienceContent> = {
         period: "January 2019 - December 2020",
         description:
           "Delivered end-to-end web solutions for diverse clients including e-commerce platforms, business management systems, and custom web applications. Designed RESTful APIs, implemented secure authentication systems, and integrated third-party services. Managed full project lifecycle from requirements gathering to deployment and maintenance.",
-        skills:
-          "Laravel, Spring Boot, Java, PHP, MySQL, REST APIs, Git, Web Development",
+        skills: [
+          "Laravel",
+          "Spring Boot",
+          "Java",
+          "PHP",
+          "MySQL",
+          "REST APIs",
+          "Git",
+          "Web Development",
+        ],
       },
       {
         title: "Software Developer Intern",
@@ -142,8 +187,14 @@ export const experienceContent: TranslatedContent<ExperienceContent> = {
         period: "June 2019 - December 2019",
         description:
           "Designed and developed a comprehensive inventory and sales management system for a multi-service retail company. Conducted requirements analysis, created database schema, and built a full-stack web application using Laravel and Vue.js. Implemented features for stock tracking, sales reporting, and invoice generation. Successfully deployed the application to Firebase, reducing manual processing time by 60%.",
-        skills:
-          "Laravel, Vue.js, MySQL, Bootstrap, Firebase, Full-Stack Development",
+        skills: [
+          "Laravel",
+          "Vue.js",
+          "MySQL",
+          "Bootstrap",
+          "Firebase",
+          "Full-Stack Development",
+        ],
       },
       {
         title: "Web Developer – Internship",
@@ -152,7 +203,13 @@ export const experienceContent: TranslatedContent<ExperienceContent> = {
         period: "June 2018 - August 2018",
         description:
           "2nd year school internship: Development of a web application for laundry management with order tracking, client management, and invoicing.",
-        skills: "AngularJS, Bootstrap, PHP, MySQL, Software Development",
+        skills: [
+          "AngularJS",
+          "Bootstrap",
+          "PHP",
+          "MySQL",
+          "Software Development",
+        ],
       },
     ],
   },
@@ -164,10 +221,20 @@ export const experienceContent: TranslatedContent<ExperienceContent> = {
         company: "INETUM (Orange Business)",
         location: "Rennes, France",
         period: "Juin 2026 - Présent",
+        current: true,
         description:
           "Responsable technique du provider Terraform open source Cloud Avenue, publié sur le Terraform Registry. Pilotage de l'évolution du projet pour accompagner les nouvelles fonctionnalités de la plateforme : développement de ressources et data sources Terraform, amélioration continue du code, correction de bugs et évolution du SDK Go associé. Collaboration avec les équipes Produit et API pour concevoir des interfaces Terraform cohérentes avec les services de la plateforme. Contribution à l'architecture, aux revues de code, aux tests, à la documentation et à la vie d'un projet open source.",
-        skills:
-          "Go, Terraform, HCL, OpenAPI, Développement IA Agentic, Git, GitHub Actions, CI/CD, Open Source",
+        skills: [
+          "Go",
+          "Terraform",
+          "HCL",
+          "OpenAPI",
+          "Développement IA Agentic",
+          "Git",
+          "GitHub Actions",
+          "CI/CD",
+          "Open Source",
+        ],
         achievementGroups: [
           {
             title: "Provider Terraform Cloud Avenue",
@@ -193,8 +260,19 @@ export const experienceContent: TranslatedContent<ExperienceContent> = {
         period: "Novembre 2023 - Mars 2026",
         description:
           "Ingénieur backend Go et Python sur une plateforme SaaS de supervision de centrales d'énergies renouvelables. Conception et exploitation de pipelines d'ingestion à forte volumétrie, architectures event-driven et connecteurs résilients pour sources hétérogènes. Astreinte opérationnelle, résolution d'incidents et observabilité.",
-        skills:
-          "Go, Python, Ruby, RabbitMQ, NATS, PostgreSQL, Kubernetes, Azure, GitOps, Prometheus, Grafana",
+        skills: [
+          "Go",
+          "Python",
+          "Ruby",
+          "RabbitMQ",
+          "NATS",
+          "PostgreSQL",
+          "Kubernetes",
+          "Azure",
+          "GitOps",
+          "Prometheus",
+          "Grafana",
+        ],
         achievementGroups: [
           {
             title: "Architecture & Ingestion de Données",
@@ -228,8 +306,17 @@ export const experienceContent: TranslatedContent<ExperienceContent> = {
         period: "Octobre 2021 - Octobre 2023",
         description:
           "Ingénieur backend sur la plateforme ASA, système d'analyse et visualisation de métriques réseau télécom traitant des millions de métriques par minute. Développement de services Go, pipelines de requêtes analytiques, et ownership technique d'un service de monitoring d'usage.",
-        skills:
-          "Go, Python, Kafka, Apache Druid, AWS, Prometheus, Grafana, Helm, Kubernetes",
+        skills: [
+          "Go",
+          "Python",
+          "Kafka",
+          "Apache Druid",
+          "AWS",
+          "Prometheus",
+          "Grafana",
+          "Helm",
+          "Kubernetes",
+        ],
         achievementGroups: [
           {
             title: "Développement Backend",
@@ -261,8 +348,15 @@ export const experienceContent: TranslatedContent<ExperienceContent> = {
         period: "Mai 2021 - Août 2021",
         description:
           "Développement d'un pipeline d'ingestion depuis la base touristique Apidae vers le PIM Akeneo, avec synchronisation bidirectionnelle et gestion des médias pour une plateforme cartographique SaaS marque blanche.",
-        skills:
-          "PHP, Laravel, Docker, Kubernetes, Akeneo, Cloudinary, API REST",
+        skills: [
+          "PHP",
+          "Laravel",
+          "Docker",
+          "Kubernetes",
+          "Akeneo",
+          "Cloudinary",
+          "API REST",
+        ],
         achievementGroups: [
           {
             title: "",
@@ -282,8 +376,16 @@ export const experienceContent: TranslatedContent<ExperienceContent> = {
         period: "Janvier 2019 - Décembre 2020",
         description:
           "Livraison de solutions web complètes pour divers clients incluant des plateformes e-commerce, des systèmes de gestion d'entreprise et des applications web personnalisées. Conception d'APIs RESTful, implémentation de systèmes d'authentification sécurisés, et intégration de services tiers. Gestion du cycle de vie complet du projet, de la collecte des exigences au déploiement et à la maintenance.",
-        skills:
-          "Laravel, Spring Boot, Java, PHP, MySQL, APIs REST, Git, Développement Web",
+        skills: [
+          "Laravel",
+          "Spring Boot",
+          "Java",
+          "PHP",
+          "MySQL",
+          "APIs REST",
+          "Git",
+          "Développement Web",
+        ],
       },
       {
         title: "Développeur Logiciel Stagiaire",
@@ -292,8 +394,14 @@ export const experienceContent: TranslatedContent<ExperienceContent> = {
         period: "Juin 2019 - Décembre 2019",
         description:
           "Conception et développement d'un système complet de gestion des stocks et des ventes pour une entreprise de vente au détail multiservices. Réalisation de l'analyse des besoins, création du schéma de base de données, et construction d'une application web full-stack avec Laravel et Vue.js. Implémentation de fonctionnalités pour le suivi des stocks, les rapports de ventes et la génération de factures. Déploiement réussi de l'application sur Firebase, réduisant le temps de traitement manuel de 60%.",
-        skills:
-          "Laravel, Vue.js, MySQL, Bootstrap, Firebase, Développement Full-Stack",
+        skills: [
+          "Laravel",
+          "Vue.js",
+          "MySQL",
+          "Bootstrap",
+          "Firebase",
+          "Développement Full-Stack",
+        ],
       },
       {
         title: "Développeur Web – Stage",
@@ -302,7 +410,13 @@ export const experienceContent: TranslatedContent<ExperienceContent> = {
         period: "Juin 2018 - Août 2018",
         description:
           "Stage de 2e année : Développement d'une application web de gestion de pressing avec système de suivi des commandes, gestion clientèle et facturation.",
-        skills: "AngularJS, Bootstrap, PHP, MySQL, Développement Web",
+        skills: [
+          "AngularJS",
+          "Bootstrap",
+          "PHP",
+          "MySQL",
+          "Développement Web",
+        ],
       },
     ],
   },

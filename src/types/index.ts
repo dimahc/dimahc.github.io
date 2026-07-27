@@ -16,9 +16,10 @@ export interface Experience {
   company: string;
   location: string;
   period: string;
+  current?: boolean;
   /** Short prose summary — shown on portfolio cards. */
   description: string;
-  skills: string;
+  skills: string[];
   /** Grouped bullet points — shown in resume detail view. */
   achievementGroups?: AchievementGroup[];
 }
