@@ -1,10 +1,10 @@
 {
   "about": {
     "paragraphs": [
-      "Ingénieur backend Go et Python avec 4+ ans sur des plateformes de données distribuées — ingestion temps réel, microservices, architectures event-driven. Actuellement chez Univers (QoS Energy) sur des pipelines de données pour le monitoring d'énergies renouvelables ; précédemment chez NumoData (EXFO) sur l'analytics réseau télécom.",
+      "Ingénieur backend Go et Python avec 4+ ans sur des plateformes de données distribuées — ingestion temps réel, microservices, architectures event-driven et développement de providers Terraform open source. Actuellement chez INETUM en mission chez Orange Business, responsable du provider Terraform open source Cloud Avenue ; précédemment chez Univers (QoS Energy) sur des pipelines de données pour le monitoring d'énergies renouvelables et chez NumoData (EXFO) sur l'analytics réseau télécom.",
       "J'attache de l'importance à la conception de systèmes, l'observabilité et la tenue en production. À l'aise aussi bien sur l'architecture des pipelines que sur l'astreinte opérationnelle."
     ],
-    "summary": "Ingénieur backend Go et Python avec 4+ ans d'expérience sur des plateformes de données distribuées. Ingestion temps réel, microservices, architectures event-driven. J'interviens aussi bien sur la conception de pipelines que sur leur tenue en production : astreinte, résolution d'incidents, observabilité.",
+    "summary": "Ingénieur logiciel évoluant à l'intersection de la data, des infrastructures cloud et des systèmes distribués. Après plusieurs années sur des architectures de traitement de données à grande échelle (IoT, télécoms, énergies renouvelables), je travaille aujourd'hui sur des composants d'Infrastructure as Code autour de Terraform, avec une contribution progressive à des projets open source.",
     "title": "À propos de moi"
   },
   "common": {

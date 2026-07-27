@@ -10,10 +10,37 @@ export const experienceContent: TranslatedContent<ExperienceContent> = {
     title: "Work Experience",
     jobs: [
       {
+        title: "Software Engineer – Open Source Terraform Provider",
+        company: "INETUM (Orange Business)",
+        location: "Rennes, France",
+        period: "June 2026 - Present",
+        description:
+          "Technical owner of the Cloud Avenue open source Terraform provider, published on the Terraform Registry. Driving the project's evolution to support new platform capabilities: developing Terraform resources and data sources, improving code quality, fixing bugs, and evolving the associated Go SDK. Collaborating with Product and API teams to design Terraform interfaces consistent with platform services. Contributing to architecture, code reviews, testing, documentation, and the lifecycle of an open source project.",
+        skills:
+          "Go, Terraform, HCL, OpenAPI, AI Agentic Development, Git, GitHub Actions, CI/CD, Open Source",
+        achievementGroups: [
+          {
+            title: "Cloud Avenue Terraform Provider",
+            items: [
+              "Took over technical ownership of the Cloud Avenue Terraform provider, published on the Terraform Registry for platform customers.",
+              "Ongoing development, maintenance, and improvement: Terraform resources and data sources, Go SDK, releases, and documentation.",
+              "GitHub triage and support: user issues, feature requests, and guidance for external contributors.",
+            ],
+          },
+          {
+            title: "Open Source Terraform Plugins",
+            items: [
+              "Maintenance and evolution of 4 cross-provider Terraform plugins in the GitHub organization, used by external organizations including Microsoft.",
+              "Open source community support: code reviews, issue triage, and contributor guidance.",
+            ],
+          },
+        ],
+      },
+      {
         title: "Backend Engineer – Data Supply Chain",
         company: "Univers (QoS Energy)",
         location: "La Chapelle-sur-Erdre, France",
-        period: "November 2023 - Present",
+        period: "November 2023 - March 2026",
         description:
           "Go and Python backend engineer on a SaaS platform monitoring renewable energy power plants. Design and operation of high-throughput data ingestion pipelines, event-driven architectures, and resilient connectors for heterogeneous sources. On-call duty, incident resolution, and observability.",
         skills:
@@ -133,10 +160,37 @@ export const experienceContent: TranslatedContent<ExperienceContent> = {
     title: "Expériences professionnelles",
     jobs: [
       {
+        title: "Ingénieur Logiciel – Provider Terraform Open Source",
+        company: "INETUM (Orange Business)",
+        location: "Rennes, France",
+        period: "Juin 2026 - Présent",
+        description:
+          "Responsable technique du provider Terraform open source Cloud Avenue, publié sur le Terraform Registry. Pilotage de l'évolution du projet pour accompagner les nouvelles fonctionnalités de la plateforme : développement de ressources et data sources Terraform, amélioration continue du code, correction de bugs et évolution du SDK Go associé. Collaboration avec les équipes Produit et API pour concevoir des interfaces Terraform cohérentes avec les services de la plateforme. Contribution à l'architecture, aux revues de code, aux tests, à la documentation et à la vie d'un projet open source.",
+        skills:
+          "Go, Terraform, HCL, OpenAPI, Développement IA Agentic, Git, GitHub Actions, CI/CD, Open Source",
+        achievementGroups: [
+          {
+            title: "Provider Terraform Cloud Avenue",
+            items: [
+              "Reprise du technical ownership du provider Terraform Cloud Avenue, publié sur le Terraform Registry pour les clients de la plateforme.",
+              "Développement, maintenance et amélioration continue : ressources et data sources Terraform, SDK Go, releases et documentation.",
+              "Triage et support GitHub : issues utilisateurs, demandes de fonctionnalités, accompagnement des contributeurs externes.",
+            ],
+          },
+          {
+            title: "Plugins Terraform Open Source",
+            items: [
+              "Maintenance et évolution de 4 plugins Terraform multi-providers dans l'organisation GitHub, utilisés par des acteurs externes dont Microsoft.",
+              "Accompagnement de la communauté open source : revues de code, triage d'issues et guidance des contributeurs.",
+            ],
+          },
+        ],
+      },
+      {
         title: "Ingénieur Backend – Data Supply Chain",
         company: "Univers (QoS Energy)",
         location: "La Chapelle-sur-Erdre, France",
-        period: "Novembre 2023 - Présent",
+        period: "Novembre 2023 - Mars 2026",
         description:
           "Ingénieur backend Go et Python sur une plateforme SaaS de supervision de centrales d'énergies renouvelables. Conception et exploitation de pipelines d'ingestion à forte volumétrie, architectures event-driven et connecteurs résilients pour sources hétérogènes. Astreinte opérationnelle, résolution d'incidents et observabilité.",
         skills:

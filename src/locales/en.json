@@ -1,8 +1,8 @@
 {
   "about": {
-    "summary": "Go and Python backend engineer with 4+ years of experience on distributed data platforms. Real-time ingestion, microservices, event-driven architectures. I work on both pipeline design and production operations: on-call duty, incident resolution, observability.",
+    "summary": "Software engineer working at the intersection of data, cloud infrastructure, and distributed systems. After several years building large-scale data processing architectures (IoT, telecom, renewable energy), I now focus on Infrastructure as Code components around Terraform, with a growing contribution to open source projects.",
     "paragraphs": [
-      "Go and Python backend engineer with 4+ years on distributed data platforms — real-time ingestion, microservices, event-driven architectures. Currently at Univers (QoS Energy) building data pipelines for renewable energy monitoring; previously at NumoData (EXFO) on telecom network analytics.",
+      "Go and Python backend engineer with 4+ years on distributed data platforms — real-time ingestion, microservices, event-driven architectures, and open source Terraform provider development. Currently at INETUM on a mission at Orange Business, owning the Cloud Avenue open source Terraform provider; previously at Univers (QoS Energy) building data pipelines for renewable energy monitoring and at NumoData (EXFO) on telecom network analytics.",
       "I care about system design, observability, and keeping production healthy. Comfortable moving between pipeline architecture and on-call operations."
     ],
     "title": "About Me"

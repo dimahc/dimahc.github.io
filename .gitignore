@@ -41,3 +41,4 @@ infra/terraform/*.tfstate*
 infra/terraform/terraform.tfvars
 .agents
 .github/agents
+.opencode

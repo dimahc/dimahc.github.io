@@ -24,7 +24,7 @@ const LABELS = {
     titlePrimary: "Backend Engineer",
     titleSecondary: "Data Systems \\& Cloud",
     summary:
-      "Go and Python backend engineer with 4+ years of experience on distributed data platforms. Real-time ingestion, microservices, event-driven architectures. I've worked on both pipeline design and production operations: on-call duty, incident resolution, observability.",
+      "Software engineer working at the intersection of data, cloud infrastructure, and distributed systems. After several years building large-scale data processing architectures (IoT, telecom, renewable energy), I now focus on Infrastructure as Code components around Terraform, with a growing contribution to open source projects.",
     sectionExperience: "Professional Experience",
     sectionSkills: "Technical Skills",
     sectionEducation: "Education",
@@ -40,7 +40,7 @@ const LABELS = {
     titlePrimary: "Backend Engineer",
     titleSecondary: "Syst\\`emes Data \\& Cloud",
     summary:
-      "Ing\\'enieur backend Go et Python avec 4 ans d'exp\\'erience sur des plateformes de donn\\'ees distribu\\'ees. Ingestion temps r\\'eel, microservices, architectures event-driven. J'ai travaill\\'e aussi bien sur la conception de pipelines que sur leur d\\'eploiement et leur tenue en production~: astreinte, r\\'esolution d'incidents, observabilit\\'e.",
+      "Ing\\'enieur logiciel \\'evoluant \\`a l'intersection de la data, des infrastructures cloud et des syst\\`emes distribu\\'es. Apr\\`es plusieurs ann\\'ees sur des architectures de traitement de donn\\'ees \\`a grande \\'echelle (IoT, t\\'el\\'ecoms, \\'energies renouvelables), je travaille aujourd'hui sur des composants d'Infrastructure as Code autour de Terraform, avec une contribution progressive \\`a des projets open source.",
     sectionExperience: "Exp\\'erience Professionnelle",
     sectionSkills: "Comp\\'etences Techniques",
     sectionEducation: "Formation",
