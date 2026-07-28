@@ -17,14 +17,14 @@
 }
 
 :root {
-  --bg: #f6f4ef;
+  --bg: #fafaf8;
   --bg-raised: #ffffff;
-  --bg-sunken: #eae7e0;
-  --line: #d6d2c8;
-  --line-soft: #e3dfd7;
+  --bg-sunken: #f0efe9;
+  --line: #d4d0c7;
+  --line-soft: #e5e2da;
   --text: #1a1a18;
-  --text-dim: #6b685e;
-  --text-faint: #9a968c;
+  --text-dim: #5c5950;
+  --text-faint: #8a867c;
   --amber: #b8783a;
   --amber-soft: #e8c89e;
   --amber-fill: rgba(184, 120, 58, 0.1);

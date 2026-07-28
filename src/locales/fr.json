@@ -38,45 +38,29 @@
     }
   },
   "experience": {
-    "skillsLabel": "Compétences",
-    "title": "Expérience",
-    "tag": "02 — parcours",
-    "now": "actuel",
     "before": "avant",
-    "earlier": "précédent"
-  },
-  "export": {
-    "label": "CV",
-    "sections": {
-      "about": "Résumé Professionnel",
-      "cloudDevOps": "Cloud & DevOps",
-      "dataMessaging": "Data & Messaging",
-      "education": "Formation",
-      "experience": "Expérience Professionnelle",
-      "languages": "Langages",
-      "observability": "Observabilité",
-      "projects": "Projets Sélectionnés",
-      "technologies": "Compétences Techniques"
-    },
-    "tooltip": "Télécharger en PDF"
+    "earlier": "précédent",
+    "now": "actuel",
+    "skillsLabel": "Compétences",
+    "tag": "02 — parcours",
+    "title": "Expérience"
   },
   "footer": {
     "cta": "Ouvert aux problèmes d'infrastructure intéressants",
     "email": "email",
     "github": "github",
-    "linkedin": "linkedin",
-    "resume": "CV"
+    "linkedin": "linkedin"
   },
   "hero": {
-    "eyebrow": "d'astreinte, et ça me va",
-    "title": "Ingénieur backend<br>pour des systèmes qui <em>tournent.</em>",
-    "lede": "Abdoul Hamid — Ingénieur Go & Python, 4+ ans sur des plateformes de données distribuées : ingestion temps réel, services event-driven, et un provider Terraform open source par-dessus le marché.",
-    "ctaWork": "Voir le travail",
-    "ctaLog": "Lire le journal",
     "cta": "Ouvert à la collaboration sur des projets backend stimulants, aux discussions sur l'architecture système, ou à l'exploration de nouvelles opportunités.",
+    "ctaLog": "Lire le journal",
+    "ctaWork": "Voir le travail",
+    "eyebrow": "d'astreinte, et ça me va",
     "getInTouch": "Me contacter",
+    "lede": "Abdoul Hamid — Ingénieur Go & Python, 4+ ans sur des plateformes de données distribuées : ingestion temps réel, services event-driven, et un provider Terraform open source par-dessus le marché.",
     "subtitle": "Systèmes Distribués • Pipelines de Données • Infrastructure Cloud",
-    "tagline": "Construction de solutions backend évolutives avec Go, Python et technologies cloud modernes."
+    "tagline": "Construction de solutions backend évolutives avec Go, Python et technologies cloud modernes.",
+    "title": "Ingénieur backend<br>pour des systèmes qui <em>tournent.</em>"
   },
   "language": {
     "switchTo": "Passer à l'anglais",
@@ -84,42 +68,42 @@
     "switchToFrench": "Passer au français"
   },
   "mission": {
-    "tag": "01 — actuel",
-    "title": "Mission en cours",
+    "description": "Propriétaire technique du provider Terraform open source Cloud Avenue — cycle de vie des ressources, cohérence d'état, et les cas limites qui cassent un plan à 2h du matin.",
     "role": "INETUM — en mission chez Orange Business",
     "status": "actif",
-    "description": "Propriétaire technique du provider Terraform open source Cloud Avenue — cycle de vie des ressources, cohérence d'état, et les cas limites qui cassent un plan à 2h du matin."
+    "tag": "01 — actuel",
+    "title": "Mission en cours"
   },
   "nav": {
-    "now": "Actuel",
-    "experience": "Expérience",
-    "oss": "Open source",
-    "writing": "Écrits",
-    "contact": "Contact"
+    "about": "À propos",
+    "blog": "Blog",
+    "contact": "Contact",
+    "projects": "Projets"
   },
   "navigation": {
     "about": "À propos",
     "ariaNavigateTo": "Naviguer vers la section {{section}}",
+    "blog": "Blog",
     "contact": "Contact",
     "experience": "Expérience",
-    "projects": "Projets",
-    "resume": "CV"
+    "projects": "Projets"
   },
   "oss": {
-    "tag": "03 — open source",
-    "title": "Cloud Avenue provider",
-    "project": "terraform-provider-cloudavenue",
+    "cta": "voir sur github →",
     "description": "Un provider Terraform open source pour provisionner l'infrastructure sur Cloud Avenue. Focus sur la correction face à la dérive, des diagnostics clairs, et un comportement stable en production.",
-    "cta": "voir sur github →"
+    "project": "terraform-provider-cloudavenue",
+    "tag": "03 — open source",
+    "title": "Cloud Avenue provider"
   },
   "projects": {
-    "skillsLabel": "Compétences",
-    "title": "Projets Professionnels et Académiques"
+    "title": "Projets",
+    "tag": "04 — projets",
+    "viewAll": "Voir tous les projets →"
   },
   "writing": {
-    "tag": "04 — écrits",
-    "title": "Le journal",
+    "emptyDesc": "C'est ici qu'atterriront les notes sur les systèmes distribués, l'observabilité, et les trucs qui ont cassé en production. Premier article à venir.",
     "emptyTitle": "Pas encore de publications",
-    "emptyDesc": "C'est ici qu'atterriront les notes sur les systèmes distribués, l'observabilité, et les trucs qui ont cassé en production. Premier article à venir."
+    "tag": "04 — écrits",
+    "title": "Le journal"
   }
 }

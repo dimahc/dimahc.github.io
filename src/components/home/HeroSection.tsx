@@ -56,7 +56,7 @@ export default function HeroSection() {
               {t("hero.ctaWork")}
             </a>
             <a
-              href="#writing"
+              href="#blog"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all border border-border text-foreground hover:border-secondary hover:text-secondary"
             >
               {t("hero.ctaLog")}

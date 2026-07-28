@@ -1,21 +1,22 @@
-import { useLanguage } from '@/context'
-import { PERSONAL_INFO } from '@/lib/constants'
+import { useParams } from 'next/navigation'
+import { PERSONAL_INFO, SITE_URL } from '@/lib/constants'
 
 export default function StructuredData() {
-    const { language } = useLanguage()
+    const params = useParams()
+    const language = (params?.locale as 'en' | 'fr') || 'fr'
 
     const content = {
         en: {
             name: PERSONAL_INFO.name.full,
             jobTitle: 'Backend Software Engineer',
             description: 'Experienced Backend Software Engineer specializing in Go, Python, and Rust. Building robust and scalable backend systems.',
-            url: 'https://dimahc.dev',
+            url: SITE_URL,
         },
         fr: {
             name: PERSONAL_INFO.name.full,
             jobTitle: 'Ingénieur Logiciel Backend',
             description: 'Ingénieur logiciel backend expérimenté spécialisé en Go, Python et Rust. Construction de systèmes backend robustes et évolutifs.',
-            url: 'https://dimahc.dev',
+            url: SITE_URL,
         },
     }
 
@@ -26,7 +27,7 @@ export default function StructuredData() {
         jobTitle: content[language].jobTitle,
         description: content[language].description,
         url: content[language].url,
-        image: 'https://dimahc.dev/images/profile.jpg',
+        image: `${SITE_URL}/images/profile.jpg`,
         sameAs: [
             PERSONAL_INFO.social.github,
             PERSONAL_INFO.social.linkedin,

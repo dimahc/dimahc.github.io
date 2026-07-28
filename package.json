@@ -4,12 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "bun run generate-resume; bun run compile-resume || echo '\u26a0\ufe0f Resume PDF compilation skipped (LaTeX not available)'; bun run scripts/generate-feed.ts; bun run scripts/generate-og-images.ts",
+    "prebuild": "bun run scripts/generate-feed.ts; bun run scripts/generate-og-images.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "generate-resume": "bun run scripts/generate-resume.ts",
-    "compile-resume": "bun run scripts/compile-resume.ts",
     "generate-feed": "bun run scripts/generate-feed.ts",
     "generate-og": "bun run scripts/generate-og-images.ts"
   },
@@ -30,6 +28,7 @@
     "react-dom": "^19.2.8",
     "react-icons": "^5.7.0",
     "react-markdown": "^10.1.0",
+    "mermaid": "^11.4.0",
     "remark-gfm": "^4.0.1",
     "satori": "^0.29.0",
     "shiki": "^4.3.1",

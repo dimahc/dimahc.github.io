@@ -22,14 +22,13 @@ export const PERSONAL_INFO = {
 } as const;
 
 export const NAVIGATION_SECTIONS = [
-  { id: "now", labelEN: "Now", labelFR: "Actuel" },
-  { id: "experience", labelEN: "Experience", labelFR: "Expérience" },
-  { id: "oss", labelEN: "Open source", labelFR: "Open source" },
-  { id: "writing", labelEN: "Writing", labelFR: "Écrits" },
+  { id: "about", labelEN: "About", labelFR: "À propos" },
+  { id: "projects", labelEN: "Projects", labelFR: "Projets" },
+  { id: "blog", labelEN: "Blog", labelFR: "Blog" },
   { id: "contact", labelEN: "Contact", labelFR: "Contact" },
 ] as const;
 
-export const DEFAULT_LANGUAGE = "en" as const;
+export const DEFAULT_LANGUAGE = "fr" as const;
 export const DEFAULT_SECTION = "about" as const;
 
 export const ANIMATION_DURATION = {
@@ -42,3 +41,5 @@ export const STAGGER_DELAY = {
   items: 0.05,
   categories: 0.1,
 } as const;
+
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://dimahc.dev';

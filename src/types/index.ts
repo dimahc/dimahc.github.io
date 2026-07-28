@@ -20,7 +20,7 @@ export interface Experience {
   /** Short prose summary — shown on portfolio cards. */
   description: string;
   skills: string[];
-  /** Grouped bullet points — shown in resume detail view. */
+  /** Grouped bullet points — shown in detail view. */
   achievementGroups?: AchievementGroup[];
 }
 

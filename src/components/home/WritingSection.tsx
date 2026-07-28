@@ -1,4 +1,5 @@
 'use client'
+import { useParams } from 'next/navigation'
 import { useTranslation } from '@/hooks/useTranslation'
 import { motion } from 'framer-motion'
 import type { PostMeta } from '@/lib/posts'
@@ -14,10 +15,12 @@ function formatDate(dateStr: string): string {
 }
 
 export default function WritingSection({ posts }: { posts: PostMeta[] }) {
+  const params = useParams()
+  const locale = (params?.locale as 'en' | 'fr') || 'fr'
   const { t } = useTranslation()
 
   return (
-    <section id="writing">
+    <section id="blog">
       <div className="max-w-[920px] mx-auto px-8 py-16 border-t border-line-soft">
         <div className="flex items-baseline gap-3.5 mb-8">
           <span className="font-mono text-[12px] text-faint uppercase tracking-wider">{t('writing.tag')}</span>
@@ -55,7 +58,7 @@ export default function WritingSection({ posts }: { posts: PostMeta[] }) {
                 viewport={{ once: true, margin: '-60px' }}
               >
                 <article className="bg-surface border border-border rounded-[10px] p-6">
-                  <a href={`/writing/${post.slug}`} className="group">
+                  <a href={`/${locale}/blog/${post.slug}`} className="group">
                     <h3 className="font-bold text-[17px] mb-3 group-hover:text-accent transition-colors">
                       {post.title}
                     </h3>
@@ -89,7 +92,7 @@ export default function WritingSection({ posts }: { posts: PostMeta[] }) {
                   )}
 
                   <a
-                    href={`/writing/${post.slug}`}
+                    href={`/${locale}/blog/${post.slug}`}
                     className="inline-flex items-center gap-1.5 text-accent hover:text-accent/80 font-medium transition-colors text-[14.5px]"
                   >
                     Read article →

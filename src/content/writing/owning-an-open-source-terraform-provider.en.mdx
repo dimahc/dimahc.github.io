@@ -1,46 +1,157 @@
 ---
 title: "Owning an open source Terraform provider"
-description: "What I learned maintaining the Cloud Avenue provider end to end — from resource design to breaking-change discipline and community support."
+description: "A practical guide to the maintainer role — vigilance points, review processes, release workflows, and the constraints that define day-to-day open source infrastructure maintenance."
 date: "2025-06-18"
 tags: ["Go", "Terraform", "Open Source"]
 ---
 
-Maintaining a Terraform provider is a strange mix of API client work, product thinking, and long-term contract design. Every resource you expose becomes a promise: users will write it into their state and expect it to keep working across upgrades.
+Becoming a maintainer is not about writing more code. It is about owning the contract between the provider and every infrastructure that depends on it.
 
-## The provider is an API contract
+This guide covers what the role actually looks like: the vigilance points that catch breaking changes before they ship, the processes that keep a community project sustainable, and the decisions that separate a maintainer from a contributor.
 
-A provider schema is not just code — it is a public interface. Renaming an attribute or changing its type is a breaking change for every module that depends on it. That constraint changes how you design.
+## The maintainer role
 
-- Model resources around the user's mental model, not the raw API response.
-- Prefer additive changes; deprecate before you remove.
-- Treat the schema as versioned surface area, because it is.
+A maintainer is responsible for the stability of a shared tool. Users pin provider versions in their `required_providers` blocks. A bad merge does not just break CI — it breaks someone's infrastructure.
 
-```go
-func resourceVDC() *schema.Resource {
-    return &schema.Resource{
-        CreateContext: resourceVDCCreate,
-        ReadContext:   resourceVDCRead,
-        UpdateContext: resourceVDCUpdate,
-        DeleteContext: resourceVDCDelete,
-        Schema: map[string]*schema.Schema{
-            "name": {
-                Type:     schema.TypeString,
-                Required: true,
-                ForceNew: true,
-            },
-        },
-    }
-}
-```
+The role shifts the relationship with the codebase. Before, you could afford to be wrong and fix it later. After, every merge is a commitment. The provider is versioned, and the schema is the API. Treat it accordingly.
 
-## Read is the hard part
+### Core responsibilities
 
-Everyone focuses on `Create`, but `Read` is where correctness lives. It is what reconciles the world with state, and a sloppy read produces endless spurious diffs. I spend most of my review energy making sure read reflects reality precisely.
+- **Triage**: incoming issues, duplicate reports, questions that are actually documentation bugs.
+- **Review**: PRs from contributors who may know the API better than you do, or who are learning Go and Terraform simultaneously.
+- **Release engineering**: bumping versions, updating changelogs, ensuring the registry accepts the upload.
+- **Backlog management**: deciding what to defer, what to prioritize, and what to say no to.
+- **Documentation**: keeping the schema descriptions, README, and contributing guide accurate and actionable.
 
-## Observability for infrastructure code
+The rough time split is 40% coding, 30% review and communication, 20% investigation, and 10% release engineering. The coding portion is not limited to the provider itself — SDKs, community plugins, and framework utilities need attention too.
 
-Even for a CLI-facing tool, observability matters: structured logs, clear error messages, and acceptance tests that run against real APIs. When a user files an issue, the difference between a five-minute fix and a five-day investigation is almost always the quality of the signals you left yourself.
+## Vigilance points
 
-> Good infrastructure tooling is boring on purpose. Predictable beats clever.
+The hardest part of maintainership is not the code. It is the contract. Every resource in the provider is a promise. Users have written it into their Terraform state. They will upgrade the provider version and expect their infrastructure to keep working.
 
-Owning the provider taught me that the most valuable thing you can ship is stability — the feature nobody notices because nothing broke.
+### Schema changes
+
+These are the highest-risk changes:
+
+- **Renaming an attribute** is a breaking change, even if the old name was a typo. Existing configurations reference the old name; renaming it forces a state migration or manual intervention.
+- **Changing a field from `Optional` to `Required`** breaks every existing configuration that omits it. Users who never set the field will see plan failures after upgrading.
+- **Removing a resource** forces users to `terraform state rm` and recreate it, which is not always possible on production infrastructure.
+- **Changing a field type** (e.g., `TypeString` to `TypeInt`) can corrupt state or cause plan-time errors.
+
+Read the Terraform provider SDK documentation as a legal document, not a reference. The schema is the API.
+
+### Upstream API behavior
+
+Contributions often fix the contributor's specific use case but miss edge cases that a maintainer has learned to fear:
+
+- What happens when the upstream API returns an empty string instead of `null`?
+- What if the user has two resources with the same name in different regions?
+- Does the change affect the `Read` function, and if so, will it cause a perpetual diff?
+- How does the provider handle rate limits, timeouts, or partial API failures?
+
+A `Read` implementation that does not handle 404s gracefully will leave orphaned resources in state. A `Create` that does not call `Read` afterward may leave attributes unset, causing perpetual diffs on the next plan.
+
+### Release compatibility
+
+- **SDK migrations** are themselves breaking changes. Switching from `terraform-plugin-sdk/v2` to the newer framework requires a full rewrite of the resource layer. Evaluate the trade-off against the project's stability requirements before attempting it.
+- **Protocol version bumps** must be coordinated with Terraform Core compatibility. A provider that claims protocol version 6.0 but uses features only available in 6.2 will fail for users on older Terraform versions.
+- **Acceptance tests against real APIs** create real infrastructure. Each test consumes API rate limits. A test suite that is too aggressive can hit limits during CI, causing flaky builds.
+
+## The review process
+
+Most contributions come from users who hit a limitation and patched around it. The patches are usually correct for their use case. The problem is that they often miss edge cases.
+
+### What to check in every PR
+
+1. **Does the change affect the schema?** If yes, is it backward compatible? Does it need a state migration?
+2. **Does the `Read` function handle all error cases?** Specifically 404s (resource deleted upstream) and unexpected response shapes.
+3. **Does the `Create` or `Update` function call `Read` afterward?** This ensures state is fully populated and prevents perpetual diffs.
+4. **Are acceptance tests cleaned up?** Every test that creates real infrastructure must destroy it, even on failure.
+5. **Is the changelog updated?** Structured entries are not optional — they feed the changelog generator.
+6. **Does the PR introduce a new dependency?** New Go dependencies increase the attack surface and the build time. They need justification.
+
+### When to block a PR
+
+Do not block PRs out of pedantry. Block them because you have seen what happens when you merge without asking the right questions. The person who fixes the resulting issue is usually the maintainer, three months later, at 2 a.m., because someone upgraded to the latest version on a Friday.
+
+## Processes
+
+### Triage
+
+New issues should be categorized quickly:
+
+- **Bug reports**: reproduce, label, and assess severity. Blocking issues for the next release get priority.
+- **Feature requests**: evaluate against the project's scope. A polite "this is out of scope for the provider, but I will review a PR if you send one" is better than a vague "maybe later."
+- **Questions**: often documentation bugs. Fix the docs, not the code.
+- **Duplicates**: close with a link to the original issue. Do not let the same problem accumulate multiple threads.
+
+### Releases
+
+A release process should be mechanical and repeatable:
+
+1. Update the version in `main.go`.
+2. Update the changelog using the project's changelog tool — structured entries only.
+3. Tag the release: `git tag v0.1.0 && git push --tags`.
+4. Build binaries for all target platforms (Linux, macOS, Windows, amd64, arm64).
+5. Create a GitHub release or use GoReleaser for binary distribution.
+6. Verify the Terraform Registry picks up the new version.
+
+Automate every step that can be automated. If you do release engineering manually, you will resent it — and eventually skip steps.
+
+### Documentation
+
+- Schema descriptions in code comments are the source of truth for the Terraform Registry documentation. Keep them concise and precise.
+- The contributing guide must be explicit about commit hygiene, changelog entry format, and PR requirements.
+- Document architectural decisions in a `DECISIONS.md` or equivalent. You will not remember why you rejected a PR six months from now.
+
+## Tooling and automation
+
+A maintainer's time is limited. The right tooling reduces toil and prevents errors:
+
+- **Linter with strict config**: catches formatting, common mistakes, and API misuse before they reach review.
+- **Changelog generator**: parses structured entries from PRs and releases. Manual changelogs are a maintenance burden.
+- **Documentation generator**: pulls from code comments (`tfplugindocs`). Documentation that drifts from the code is worse than no documentation.
+- **Pre-commit hooks**: enforce formatting and basic checks locally before a PR is even opened.
+- **CI pipelines**: run unit tests, linting, and acceptance tests against real API endpoints with credentials injected as secrets.
+
+The project should not rely on raw `Make` alone. A task runner with explicit targets makes the build process more discoverable and harder to break.
+
+## Ecosystem and cross-project concerns
+
+The organization may maintain more than one repository. Open source libraries that extend the Terraform plugin framework — utilities for schema definitions, type helpers, plan modifiers, and validators — are often shared across providers.
+
+A change in a framework library can affect multiple providers. The review process applies there too: backward compatibility, clear migration paths, and documentation that does not assume everyone knows the internals.
+
+## Sustainability and boundaries
+
+Most users are polite. The provider is for provisioning a commercial product, so most issue openers are customers. The maintainer is paid to work on this full-time, not in spare time. That changes the expectations: users need solutions, and the maintainer needs to handle them with respect.
+
+Boundaries are not rudeness — they are sustainability:
+
+- Do not fix issues you did not create unless they are blocking a release.
+- Do not implement features that only one person needs unless they submit a PR.
+- Say no early and clearly. A vague "maybe later" that never happens erodes trust faster than a direct "this is out of scope."
+- Find the people who submit good PRs. They are your team, whether they know it or not.
+
+Caring about sustainability is not the same as not caring. It means prioritizing the long-term health of the project over short-term responsiveness.
+
+## Checklist for new maintainers
+
+If you are about to become a maintainer of a community project, here is what matters:
+
+- **Read the issues before the code.** The issues tell you what the project actually is. The code tells you what the original authors thought it should be. Those are rarely the same thing.
+- **Document your decisions.** Not for users. For yourself. Six months from now, you will not remember why you rejected that PR. Write it down.
+- **Say no early.** A polite "this is out of scope for the provider, but I will review a PR if you send one" is better than a vague "maybe later" that never happens.
+- **Automate the boring parts.** Release notes, changelogs, dependency updates. If you do it manually, you will resent it.
+- **Find the other maintainers.** Even if you are the only one with write access, find the people who submit good PRs. They are your team.
+- **Treat the schema as a contract.** Every attribute name, every `Required` vs. `Optional` flag, every `ForceNew` setting — these are promises to users. Breaking them has real consequences.
+- **Review for edge cases, not just correctness.** A PR that works for the contributor's use case but fails on an empty string, a null response, or a concurrent update is not a good PR.
+- **Keep the release process mechanical.** If a release requires more than five manual steps, automate the extras.
+
+## The payoff
+
+Last week, a user opened an issue with a failing test case. They had already identified the root cause and proposed a fix. I reviewed it, merged it, and released a new version the same day.
+
+That is the job. Most days are quieter. But when it works, it works well.
+
+I still do not consider myself an expert. I am just the person who has been around long enough to know where the skeletons are buried.

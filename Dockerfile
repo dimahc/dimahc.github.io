@@ -8,15 +8,7 @@ COPY package.json bun.lock ./
 # Install dependencies
 RUN bun install --frozen-lockfile
 
-# Stage 2: Compile LaTeX resumes to PDF
-FROM texlive/texlive:latest AS latex-builder
-WORKDIR /app
-COPY resume/ ./resume/
-COPY scripts/compile-resume.sh ./scripts/
-RUN mkdir -p public/static/resume/en public/static/resume/fr && \
-    bash scripts/compile-resume.sh
-
-# Stage 3: Builder
+# Stage 2: Builder
 FROM oven/bun:1-alpine AS builder
 WORKDIR /app
 
@@ -26,9 +18,6 @@ RUN apk add --no-cache bash
 # Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-# Copy compiled PDFs from latex stage (skip recompilation in prebuild)
-COPY --from=latex-builder /app/public/static/resume ./public/static/resume
 
 # Copy environment variables if needed for build time
 ARG NEXT_PUBLIC_EMAILJS_SERVICE_ID
@@ -42,8 +31,6 @@ ENV NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=$NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
 ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
 ENV NODE_ENV=production
 
-# Build the static export — run generate-resume then next build (PDFs already compiled above)
-RUN bun run generate-resume && bun x next build
 
 # Stage 3: Runner (serve static files)
 FROM oven/bun:1-alpine AS runner

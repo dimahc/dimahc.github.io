@@ -1,6 +1,6 @@
 'use client'
 
-import { useLanguage } from '@/context'
+import { useParams } from 'next/navigation'
 import type { PostMeta } from '@/lib/posts'
 
 function formatDate(dateStr: string): string {
@@ -14,8 +14,9 @@ function formatDate(dateStr: string): string {
 }
 
 export default function PostList({ posts }: { posts: PostMeta[] }) {
-  const { language } = useLanguage()
-  const filtered = posts.filter((p) => p.lang === language)
+  const params = useParams()
+  const locale = (params?.locale as string) || 'fr'
+  const filtered = posts.filter((p) => p.lang === locale)
 
   if (filtered.length === 0) {
     return <p className="text-muted">No posts yet.</p>
@@ -26,7 +27,7 @@ export default function PostList({ posts }: { posts: PostMeta[] }) {
       {filtered.map((post) => (
         <article
           key={`${post.slug}-${post.lang}`}
-          className="border border-border rounded-[10px] p-6 bg-surface hover:border-line-soft transition-colors"
+          className="border border-border rounded-[10px] p-6 bg-surface hover:border-line-soft hover:shadow-sm transition-all"
         >
           <div className="flex items-center gap-3 mb-2">
             <time className="font-[family-name:var(--font-jetbrains-mono)] text-[12px] text-faint">
@@ -38,7 +39,7 @@ export default function PostList({ posts }: { posts: PostMeta[] }) {
             </span>
           </div>
 
-          <a href={`/writing/${post.slug}`} className="group">
+          <a href={`/${locale}/blog/${post.slug}`} className="group">
             <h2 className="font-[family-name:var(--font-space-grotesk)] font-bold text-[17px] mb-2 group-hover:text-accent transition-colors">
               {post.title}
             </h2>
@@ -52,7 +53,7 @@ export default function PostList({ posts }: { posts: PostMeta[] }) {
             {post.tags.map((tag) => (
               <span
                 key={tag}
-                className="font-[family-name:var(--font-jetbrains-mono)] text-[11px] px-2.5 py-0.5 border border-border rounded-full text-faint"
+                className="font-[family-name:var(--font-jetbrains-mono)] text-[11px] px-2.5 py-0.5 border border-border rounded-full text-faint bg-sunken/50"
               >
                 {tag}
               </span>

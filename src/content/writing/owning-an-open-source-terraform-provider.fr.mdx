@@ -1,46 +1,157 @@
 ---
 title: "Porter un provider Terraform open source"
-description: "Ce que j'ai appris en maintenant le provider Cloud Avenue de bout en bout — du design des ressources à la discipline sur les breaking changes, jusqu'au support communautaire."
+description: "Un guide pratique sur le rôle de maintainer — les points de vigilance, les processus de revue, les workflows de release, et les contraintes qui définissent la maintenance quotidienne d'un projet open source d'infrastructure."
 date: "2025-06-18"
 tags: ["Go", "Terraform", "Open Source"]
 ---
 
-Maintenir un provider Terraform, c'est un mélange étrange de client d'API, de réflexion produit et de conception de contrat sur le long terme. Chaque ressource que vous exposez devient une promesse : les utilisateurs vont l'inscrire dans leur state et s'attendre à ce qu'elle continue de fonctionner à travers les montées de version.
+Devenir maintainer ne consiste pas à écrire plus de code. Il s'agit d'être responsable du contrat entre le provider et chaque infrastructure qui en dépend.
 
-## Le provider est un contrat d'API
+Ce guide couvre ce que le rôle implique réellement : les points de vigilance qui détectent les changements cassants avant qu'ils ne soient publiés, les processus qui rendent un projet communautaire durable, et les décisions qui distinguent un maintainer d'un simple contributeur.
 
-Un schéma de provider n'est pas juste du code — c'est une interface publique. Renommer un attribut ou changer son type est un breaking change pour chaque module qui en dépend. Cette contrainte change la façon de concevoir.
+## Le rôle de maintainer
 
-- Modéliser les ressources autour du modèle mental de l'utilisateur, pas de la réponse brute de l'API.
-- Privilégier les changements additifs ; déprécier avant de supprimer.
-- Traiter le schéma comme une surface versionnée, parce que c'en est une.
+Un maintainer est responsable de la stabilité d'un outil partagé. Les utilisateurs épinglent les versions du provider dans leurs blocs `required_providers`. Un mauvais merge ne casse pas seulement CI — il casse l'infrastructure de quelqu'un.
 
-```go
-func resourceVDC() *schema.Resource {
-    return &schema.Resource{
-        CreateContext: resourceVDCCreate,
-        ReadContext:   resourceVDCRead,
-        UpdateContext: resourceVDCUpdate,
-        DeleteContext: resourceVDCDelete,
-        Schema: map[string]*schema.Schema{
-            "name": {
-                Type:     schema.TypeString,
-                Required: true,
-                ForceNew: true,
-            },
-        },
-    }
-}
-```
+Le rôle transforme la relation avec la base de code. Avant, on pouvait se permettre de se tromper et corriger après. Après, chaque merge est un engagement. Le provider est versionné, et le schéma est l'API. Traitez-le en conséquence.
 
-## Le Read, c'est le plus dur
+### Responsabilités principales
 
-Tout le monde se concentre sur le `Create`, mais c'est dans le `Read` que vit la justesse. C'est lui qui réconcilie le monde réel avec le state, et un read bâclé produit des diffs parasites sans fin. Je passe l'essentiel de mon énergie de revue à m'assurer que le read reflète précisément la réalité.
+- **Triage** : les nouvelles issues, les rapports en double, les questions qui sont en réalité des bugs de documentation.
+- **Revue** : les PRs de contributeurs qui connaissent l'API mieux que vous, ou qui apprennent Go et Terraform en même temps.
+- **Release engineering** : bump de versions, mise à jour du changelog, vérification que le registry accepte l'upload.
+- **Gestion du backlog** : décider ce qui est reporté, ce qui est prioritaire, et à quoi dire non.
+- **Documentation** : maintenir les descriptions de schéma, le README et le guide de contribution précis et exploitables.
 
-## L'observabilité pour du code d'infrastructure
+La répartition du temps est approximativement de 40% code, 30% revue et communication, 20% investigation, et 10% release engineering. La partie code ne se limite pas au provider lui-même — les SDKs, les plugins communautaires et les utilitaires du framework nécessitent aussi de l'attention.
 
-Même pour un outil en ligne de commande, l'observabilité compte : logs structurés, messages d'erreur clairs, et tests d'acceptation qui tournent contre de vraies APIs. Quand un utilisateur ouvre un ticket, la différence entre un correctif en cinq minutes et une enquête de cinq jours tient presque toujours à la qualité des signaux qu'on s'est laissés.
+## Points de vigilance
 
-> Un bon outillage d'infrastructure est ennuyeux, volontairement. Prévisible vaut mieux que malin.
+La partie la plus difficile du rôle n'est pas le code. C'est le contrat. Chaque ressource du provider est une promesse. Les utilisateurs l'ont écrite dans leur state Terraform. Ils vont mettre à jour la version du provider et s'attendre à ce que leur infrastructure continue de fonctionner.
 
-Porter ce provider m'a appris que la chose la plus précieuse à livrer, c'est la stabilité — la fonctionnalité que personne ne remarque parce que rien n'a cassé.
+### Changements de schéma
+
+Ce sont les modifications les plus risquées :
+
+- **Renommer un attribut** est un breaking change, même si l'ancien nom était une faute de frappe. Les configurations existantes référencent l'ancien nom ; le renommer force une migration d'état ou une intervention manuelle.
+- **Changer un champ de `Optional` à `Required`** casse toutes les configurations existantes qui l'omettent. Les utilisateurs qui n'ont jamais défini le champ verront des échecs de plan après la mise à jour.
+- **Supprimer une ressource** force les utilisateurs à faire un `terraform state rm` et à la recréer, ce qui n'est pas toujours possible sur de l'infrastructure de production.
+- **Changer le type d'un champ** (par exemple `TypeString` vers `TypeInt`) peut corrompre l'état ou provoquer des erreurs au moment du plan.
+
+Lisez la documentation du SDK Terraform comme un document juridique, pas comme une référence. Le schéma est l'API.
+
+### Comportement de l'API amont
+
+Les contributions corrigent souvent le cas d'usage spécifique du contributeur mais ignorent des cas limites qu'un maintainer a appris à redouter :
+
+- Que se passe-t-il quand l'API amont retourne une chaîne vide au lieu de `null` ?
+- Et si l'utilisateur a deux ressources avec le même nom dans des régions différentes ?
+- Est-ce que le changement affecte la fonction `Read`, et si oui, va-t-il causer un diff perpétuel ?
+- Comment le provider gère-t-il les limites de débit (rate limits), les timeouts ou les défaillances partielles de l'API ?
+
+Une implémentation de `Read` qui ne gère pas les 404s laissera des ressources orphelines dans l'état. Un `Create` qui n'appelle pas `Read` ensuite peut laisser des attributs indéfinis, causant des diffs perpétuels au prochain plan.
+
+### Compatibilité des releases
+
+- **Les migrations de SDK** sont elles-mêmes des changements cassants. Passer de `terraform-plugin-sdk/v2` au framework plus récent nécessite une réécriture complète de la couche de ressources. Évaluez le compromis par rapport aux exigences de stabilité du projet avant de tenter la migration.
+- **Les augmentations de version de protocole** doivent être coordonnées avec la compatibilité Terraform Core. Un provider qui déclare la version de protocole 6.0 mais utilise des fonctionnalités uniquement disponibles en 6.2 échouera pour les utilisateurs sur des versions plus anciennes de Terraform.
+- **Les tests d'acceptance contre de vraies API** créent de vraies infrastructures. Chaque test consomme des limites de débit de l'API. Une suite de tests trop agressive peut atteindre les limites en CI, provoquant des builds instables.
+
+## Le processus de revue
+
+La plupart des contributions viennent d'utilisateurs qui ont buté sur une limitation et ont patché autour. Les patches sont généralement corrects pour leur cas d'usage. Le problème est qu'ils oublient souvent les cas limites.
+
+### Ce qu'il faut vérifier dans chaque PR
+
+1. **Le changement affecte-t-il le schéma ?** Si oui, est-il rétrocompatible ? A-t-il besoin d'une migration d'état ?
+2. **La fonction `Read` gère-t-elle tous les cas d'erreur ?** En particulier les 404 (ressource supprimée en amont) et les formes de réponse inattendues.
+3. **Les fonctions `Create` ou `Update` appellent-elles `Read` ensuite ?** Cela garantit que l'état est entièrement peuplé et empêche les diffs perpétuels.
+4. **Les tests d'acceptance nettoient-ils les ressources créées ?** Chaque test qui crée de vraie infrastructure doit la détruire, même en cas d'échec.
+5. **Le changelog est-il mis à jour ?** Les entrées structurées ne sont pas optionnelles — elles alimentent le générateur de changelog.
+6. **La PR introduit-elle une nouvelle dépendance ?** Les nouvelles dépendances Go augmentent la surface d'attaque et le temps de build. Elles nécessitent une justification.
+
+### Quand bloquer une PR
+
+Ne bloquez pas les PRs par pédanterie. Bloquez-les parce que vous avez vu ce qui arrive quand on merge sans poser les bonnes questions. Celui qui corrigera le problème résultant est généralement le maintainer, trois mois plus tard, à 2 h du matin, parce que quelqu'un a mis à jour la dernière version un vendredi.
+
+## Les processus
+
+### Triage
+
+Les nouvelles issues doivent être catégorisées rapidement :
+
+- **Rapports de bug** : reproduire, étiqueter et évaluer la sévérité. Les bugs bloquants pour la prochaine release passent en priorité.
+- **Demandes de fonctionnalités** : évaluer par rapport au périmètre du projet. Un « c'est hors scope pour le provider, mais je reverrai une PR si vous en envoyez une » poli vaut mieux qu'un « peut-être plus tard » vague.
+- **Questions** : souvent des bugs de documentation. Corrigez la documentation, pas le code.
+- **Doublons** : fermez avec un lien vers l'issue originale. Ne laissez pas le même problème accumuler plusieurs fils de discussion.
+
+### Releases
+
+Un processus de release doit être mécanique et reproductible :
+
+1. Mettre à jour la version dans `main.go`.
+2. Mettre à jour le changelog avec l'outil de changelog du projet — des entrées structurées uniquement.
+3. Tagger la release : `git tag v0.1.0 && git push --tags`.
+4. Builder les binaires pour toutes les plateformes cibles (Linux, macOS, Windows, amd64, arm64).
+5. Créer une release GitHub ou utiliser GoReleaser pour la distribution des binaires.
+6. Vérifier que le Terraform Registry détecte la nouvelle version.
+
+Automatisez chaque étape qui peut l'être. Si vous faites du release engineering manuellement, vous le regretterez — et vous finirez par sauter des étapes.
+
+### Documentation
+
+- Les descriptions de schéma dans les commentaires de code sont la source de vérité pour la documentation du Terraform Registry. Gardez-les concises et précises.
+- Le guide de contribution doit être explicite sur l'hygiène des commits, le format des entrées de changelog et les exigences des PRs.
+- Documentez les décisions architecturales dans un `DECISIONS.md` ou équivalent. Vous ne vous souviendrez pas dans six mois de pourquoi vous avez rejeté cette PR.
+
+## Outils et automatisation
+
+Le temps d'un maintainer est limité. Les bons outils réduisent la corvée et préviennent les erreurs :
+
+- **Linter avec config stricte** : détecte le formatage, les erreurs courantes et les mauvais usages de l'API avant qu'ils n'atteignent la revue.
+- **Générateur de changelog** : parse les entrées structurées des PRs et des releases. Les changelogs manuels sont un fardeau de maintenance.
+- **Générateur de documentation** : extrait les commentaires de code (`tfplugindocs`). Une documentation qui dérive du code est pire que l'absence de documentation.
+- **Pre-commit hooks** : imposent le formatage et les vérifications de base localement avant même qu'une PR soit ouverte.
+- **Pipelines CI** : lancent les tests unitaires, le linting et les tests d'acceptance contre de vrais endpoints API avec des injectés comme secrets.
+
+Le projet ne devrait pas reposer uniquement sur `Make`. Un task runner avec des cibles explicites rend le processus de build plus découvrable et plus difficile à casser.
+
+## Écosystème et préoccupations transversales
+
+L'organisation peut maintenir plus d'un dépôt. Les bibliothèques open source qui étendent le framework Terraform — utilitaires pour les définitions de schéma, helpers de types, plan modifiers et validators — sont souvent partagées entre les providers.
+
+Un changement dans une bibliothèque du framework peut affecter plusieurs providers. Le processus de revue s'applique aussi ici : compatibilité descendante, chemins de migration clairs, et documentation qui ne suppose pas que tout le monde connaît les internals.
+
+## Durabilité et limites
+
+La plupart des utilisateurs sont polis. Le provider sert à provisionner un produit commercial, donc la plupart des personnes qui ouvrent des issues sont des clients. Le maintainer est payé pour travailler dessus à temps plein, pas dans son temps libre. Cela change les attentes : les utilisateurs ont besoin de solutions, et le maintainer doit les traiter avec respect.
+
+Les limites ne sont pas de la rudeness — elles sont de la durabilité :
+
+- Ne corrigez pas les issues que vous n'avez pas créées, sauf si elles bloquent une release.
+- N'implémentez pas les fonctionnalités qui ne servent qu'à une seule personne, sauf si elle soumet une PR.
+- Dites non tôt et clairement. Un « peut-être plus tard » vague qui n'arrive jamais érode la confiance plus vite qu'un refus direct.
+- Trouvez les personnes qui soumettent de bonnes PRs. Elles sont votre équipe, qu'elles le sachent ou non.
+
+Se soucier de la durabilité n'est pas la même chose que ne pas se soucier. Cela signifie prioriser la santé à long terme du projet sur la réactivité à court terme.
+
+## Liste de vérification pour les nouveaux maintainers
+
+Si vous êtes sur le point de devenir maintainer d'un projet communautaire, voici ce qui compte :
+
+- **Lisez les issues avant le code.** Les issues disent ce que le projet est vraiment. Le code dit ce que les auteurs originels pensaient qu'il devrait être. Ce sont rarement la même chose.
+- **Documentez vos décisions.** Pas pour les utilisateurs. Pour vous. Dans six mois, vous ne vous rappellerez pas pourquoi vous avez rejeté cette PR. Écrivez-le.
+- **Dites non tôt.** Un « c'est hors scope pour le provider, mais je reverrai une PR si vous en envoyez une » poli vaut mieux qu'un « peut-être plus tard » vague qui n'arrive jamais.
+- **Automatisez les parties ennuyeuses.** Notes de release, changelog, mises à jour de dépendances. Si vous le faites à la main, vous le regretterez.
+- **Trouvez les autres maintainers.** Même si vous êtes le seul avec les droits d'écriture, trouvez les gens qui soumettent de bonnes PRs. C'est votre équipe.
+- **Traitez le schéma comme un contrat.** Chaque nom d'attribut, chaque `Required` vs. `Optional`, chaque `ForceNew` — ce sont des promesses envers les utilisateurs. Les briser a des conséquences réelles.
+- **Revoyez pour les cas limites, pas seulement pour la correction.** Une PR qui fonctionne pour le cas d'usage du contributeur mais échoue sur une chaîne vide, une réponse null ou une mise à jour concurrente n'est pas une bonne PR.
+- **Gardez le processus de release mécanique.** Si une release nécessite plus de cinq étapes manuelles, automatisez le reste.
+
+## Le gain
+
+La semaine dernière, un utilisateur a ouvert une issue avec un cas de test qui échouait. Il avait déjà identifié la cause racine et proposé un fix. J'ai reviewé, mergé, et released une nouvelle version le même jour.
+
+C'est ça, le job. La plupart des jours sont plus calmes. Mais quand ça marche, ça marche bien.
+
+Je ne me considère toujours pas comme un expert. Je suis juste la personne qui est là depuis assez longtemps pour savoir où sont les squelettes enterrés.

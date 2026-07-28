@@ -45,27 +45,11 @@
     "before": "before that",
     "earlier": "earlier"
   },
-  "export": {
-    "label": "Resume",
-    "sections": {
-      "about": "Professional Summary",
-      "cloudDevOps": "Cloud & DevOps",
-      "dataMessaging": "Data & Messaging",
-      "education": "Education",
-      "experience": "Professional Experience",
-      "languages": "Languages",
-      "observability": "Observability",
-      "projects": "Selected Projects",
-      "technologies": "Technical Skills"
-    },
-    "tooltip": "Download as PDF"
-  },
   "footer": {
     "cta": "Open to interesting infrastructure problems",
     "email": "email",
     "github": "github",
-    "linkedin": "linkedin",
-    "resume": "resume"
+    "linkedin": "linkedin"
   },
   "hero": {
     "eyebrow": "on call, and fine with it",
@@ -91,19 +75,18 @@
     "description": "Owning the Cloud Avenue open source Terraform provider — resource lifecycle, state consistency, and the edge cases that break a plan at 2am."
   },
   "nav": {
-    "now": "Now",
-    "experience": "Experience",
-    "oss": "Open source",
-    "writing": "Writing",
+    "about": "About",
+    "projects": "Projects",
+    "blog": "Blog",
     "contact": "Contact"
   },
   "navigation": {
     "about": "About",
     "ariaNavigateTo": "Navigate to {{section}} section",
+    "blog": "Blog",
     "contact": "Contact",
     "experience": "Experience",
-    "projects": "Projects",
-    "resume": "Resume"
+    "projects": "Projects"
   },
   "oss": {
     "tag": "03 — open source",
@@ -113,8 +96,9 @@
     "cta": "view on github →"
   },
   "projects": {
-    "skillsLabel": "Skills",
-    "title": "Professional and Academic Projects"
+    "title": "Projects",
+    "tag": "04 — projects",
+    "viewAll": "See all projects →"
   },
   "writing": {
     "tag": "04 — writing",

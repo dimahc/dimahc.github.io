@@ -1,0 +1,292 @@
+---
+title: "How to build a Terraform provider"
+description: "A practical guide to developing a Terraform provider in Go — from project structure to release practices, focused on production-grade implementation details."
+date: "2025-06-25"
+tags: ["Go", "Terraform", "Infrastructure as Code"]
+---
+
+Building a Terraform provider is straightforward once you understand the plugin architecture. The official documentation explains the mechanics of the Terraform Plugin Framework, but it leaves many implementation details to the reader. This guide focuses on those practical aspects: project structure, resource design, API clients, testing strategies, and release practices that matter when maintaining a production-grade provider.
+
+## Architecture overview
+
+A Terraform provider is a Go binary that communicates with Terraform Core via the plugin protocol over gRPC. The provider implements resource and data source lifecycles; Terraform invokes these operations based on the configured dependency graph.
+
+```
+┌─────────────┐     gRPC      ┌──────────────┐
+│ Terraform   │◄─────────────►│  Provider    │
+│ Core        │  plugin       │  (Go binary) │
+└─────────────┘               └──────┬───────┘
+                                      │ HTTP/REST
+                                      ▼
+                              ┌─────────────┐
+                              │  Upstream    │
+                              │  API         │
+                              └─────────────┘
+```
+
+The provider does not interact with Terraform state directly. Terraform Core manages state; the provider only receives resource configurations and returns computed attributes.
+
+## SDK selection
+
+Two SDKs are available:
+
+- **plugin-sdk/v2** — the stable, imperative SDK used by most existing providers. Explicit control over the resource lifecycle.
+- **plugin-framework** — the newer SDK with improved type safety and plan-time validation. Less battle-tested for complex migrations.
+
+For new providers, the framework is the recommended choice. For existing providers, staying on the current SDK is generally preferable unless migration provides clear operational benefits. Switching SDKs is a breaking change that requires a full rewrite of the resource layer.
+
+## Project structure
+
+A production provider separates the Terraform-facing layer from the API client:
+
+```
+.
+├── cmd/
+│   └── provider/
+│       └── main.go              # Entry point
+├── internal/
+│   └── provider/
+│       ├── provider.go          # Provider configuration schema
+│       ├── resource_*.go        # Resource implementations
+│       └── data_source_*.go     # Data source implementations
+├── pkg/
+│   └── client/                  # API client, shared across tools
+├── tests/
+│   └── provider/                # Acceptance tests
+├── docs/                        # Generated documentation
+├── examples/                    # Usage examples
+├── go.mod
+├── main.go
+└── terraform-registry-manifest.json
+```
+
+The `internal/` directory prevents external imports, enforcing a clean boundary between the provider implementation and reusable logic. The API client lives in `pkg/` only if it needs to be shared with external tooling; otherwise, keep it internal.
+
+## Resource lifecycle
+
+A resource implements five operations: `Create`, `Read`, `Update`, `Delete`, and `Create` without `Update` for immutable resources. Terraform calls these based on the dependency graph and configuration drift.
+
+### Schema definition
+
+The schema declares the resource's configuration model. Each attribute specifies its type, whether it is required or optional, and whether changes force recreation:
+
+```go
+func resourceExample() *schema.Resource {
+    return &schema.Resource{
+        CreateContext: resourceExampleCreate,
+        ReadContext:   resourceExampleRead,
+        UpdateContext: resourceExampleUpdate,
+        DeleteContext: resourceExampleDelete,
+        Schema: map[string]*schema.Schema{
+            "name": {
+                Type:     schema.TypeString,
+                Required: true,
+                ForceNew: true,
+            },
+            "description": {
+                Type:     schema.TypeString,
+                Optional: true,
+            },
+        },
+    }
+}
+```
+
+`ForceNew: true` marks immutable attributes. Changing them triggers resource recreation rather than in-place update.
+
+### Create and Read
+
+`Create` calls the upstream API, sets the resource ID, and delegates to `Read` to populate state:
+
+```go
+func resourceExampleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) error {
+    client := meta.(*api.Client)
+    
+    obj, err := client.CreateExample(ctx, api.ExampleCreateInput{
+        Name:        d.Get("name").(string),
+        Description: d.Get("description").(string),
+    })
+    if err != nil {
+        return err
+    }
+    
+    d.SetId(obj.ID)
+    return resourceExampleRead(ctx, d, meta)
+}
+```
+
+`Read` reconciles Terraform state with the upstream API. It must handle 404s gracefully by removing the resource from state:
+
+```go
+func resourceExampleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) error {
+    client := meta.(*api.Client)
+    
+    obj, err := client.GetExample(ctx, d.Id())
+    if err != nil {
+        if strings.Contains(err.Error(), "not found") {
+            d.SetId("")
+            return nil
+        }
+        return err
+    }
+    
+    d.Set("name", obj.Name)
+    d.Set("description", obj.Description)
+    return nil
+}
+```
+
+A correct `Read` implementation prevents perpetual diffs — the most common source of provider bugs.
+
+### Data sources
+
+Data sources are read-only. They implement only `Read`, accepting filter arguments and returning computed attributes:
+
+```go
+func dataSourceExampleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) error {
+    client := meta.(*api.Client)
+    
+    obj, err := client.GetExampleByName(ctx, d.Get("name").(string))
+    if err != nil {
+        return err
+    }
+    
+    d.SetId(obj.ID)
+    d.Set("description", obj.Description)
+    return nil
+}
+```
+
+## API client design
+
+The API client handles authentication, request construction, and response parsing. It should not depend on Terraform types — keep it framework-agnostic so it can be tested independently:
+
+```go
+type Client struct {
+    baseURL    string
+    token      string
+    httpClient *http.Client
+}
+
+func (c *Client) CreateExample(ctx context.Context, input ExampleCreateInput) (*Example, error) {
+    body, err := json.Marshal(input)
+    if err != nil {
+        return nil, err
+    }
+    
+    req, err := http.NewRequestWithContext(ctx, "POST",
+        fmt.Sprintf("%s/examples", c.baseURL), bytes.NewReader(body))
+    if err != nil {
+        return nil, err
+    }
+    
+    req.Header.Set("Authorization", "Bearer "+c.token)
+    req.Header.Set("Content-Type", "application/json")
+    
+    resp, err := c.httpClient.Do(req)
+    if err != nil {
+        return nil, err
+    }
+    defer resp.Body.Close()
+    
+    if resp.StatusCode != http.StatusCreated {
+        return nil, fmt.Errorf("API returned %d: %s", resp.StatusCode, resp.Body)
+    }
+    
+    var obj Example
+    if err := json.NewDecoder(resp.Body).Decode(&obj); err != nil {
+        return nil, err
+    }
+    
+    return &obj, nil
+}
+```
+
+## Testing strategy
+
+Two test categories serve different purposes:
+
+**Unit tests** validate the API client in isolation. Mock HTTP responses, verify request shapes, and assert error handling. These run without credentials and provide fast feedback during development.
+
+**Acceptance tests** validate the full stack: Terraform Core, the provider, and the real upstream API. They create real resources, verify state, update configurations, and destroy resources. They are slow, expensive, and flaky if the upstream API is inconsistent.
+
+Acceptance tests follow the `TestAcc` prefix convention:
+
+```go
+func TestAccExample_basic(t *testing.T) {
+    resource.Test(t, resource.TestCase{
+        PreCheck: func() { testAccPreCheck(t) },
+        Providers: testAccProviders,
+        Steps: []resource.TestStep{
+            {
+                Config: testAccExampleConfig("hello"),
+                Check: resource.ComposeTestCheckFunc(
+                    resource.TestCheckResourceAttr("example_resource", "name", "hello"),
+                ),
+            },
+        },
+    })
+}
+```
+
+Run acceptance tests in CI with environment variables injected as secrets. Limit local execution to debugging specific scenarios.
+
+## Documentation generation
+
+Terraform providers use `tfplugindocs` to generate documentation from schema descriptions and code comments. The generated documentation is published to the Terraform Registry automatically when the repository is linked.
+
+Write descriptions directly in the schema:
+
+```go
+"name": {
+    Type:        schema.TypeString,
+    Required:    true,
+    ForceNew:    true,
+    Description: "The name of the example resource. Must be unique within the organization.",
+},
+```
+
+Keep descriptions concise and precise. They become the primary reference for users.
+
+## Release process
+
+Providers follow semantic versioning. The version appears in `main.go` and the registry manifest:
+
+```json
+{
+  "version": 1,
+  "metadata": {
+    "protocol_versions": ["6.0"]
+  }
+}
+```
+
+Release steps:
+
+1. Update the version in `main.go`.
+2. Update the changelog using the project's changelog tool.
+3. Tag the release: `git tag v0.1.0 && git push --tags`.
+4. Build binaries for all target platforms (Linux, macOS, Windows, amd64, arm64).
+5. Create a GitHub release or use GoReleaser to automate binary distribution.
+
+The Terraform Registry detects new releases automatically when the repository is linked.
+
+## Operational considerations
+
+**Error messages are part of the user experience.** A provider that returns `error creating resource` provides no actionable information. Surface the upstream API response and the failed operation:
+
+```go
+return fmt.Errorf("error creating example %s: API returned %d: %s", name, resp.StatusCode, body)
+```
+
+**Use structured logging during development and support.** Terraform's built-in logging (`TF_LOG=DEBUG`) captures the full plugin protocol exchange. When users open issues, debug logs are the primary diagnostic artifact.
+
+**Plan for state evolution early.** Schema changes require explicit migration logic. Renaming an attribute, changing a type, or removing a field all require `StateUpgrader` implementations. Without them, `terraform plan` produces spurious diffs or fails entirely.
+
+**Choose the SDK based on project maturity.** The plugin framework offers improved type safety and plan-time validation, but migration from plugin-sdk/v2 is manual and breaking. Evaluate the trade-off against the project's stability requirements.
+
+**Treat acceptance tests as integration tests.** They validate the complete request-response cycle against real infrastructure. Execute them in CI, not during every local development cycle, to avoid rate limits and flaky builds.
+
+## Conclusion
+
+Building a provider that compiles is simple. Building a provider that does not break existing infrastructure requires attention to schema stability, error handling, and testing discipline. The implementation details — resource lifecycle, API client design, state migration — are where production-grade providers are distinguished from prototypes.

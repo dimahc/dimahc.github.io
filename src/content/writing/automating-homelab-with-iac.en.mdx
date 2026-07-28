@@ -1,0 +1,298 @@
+---
+title: "Automating a homelab with Terraform, Ansible, and Docker"
+description: "How I stopped clicking through web UIs and turned my home server into a reproducible, version-controlled infrastructure — the tools, the services, and the commands I actually use."
+date: "2026-07-28"
+tags: ["Homelab", "Terraform", "Ansible", "Docker", "Infrastructure as Code"]
+---
+
+Every homelab reaches a breaking point. You start with a Raspberry Pi and a few Docker containers. Then you add a NAS, a VLAN, a reverse proxy, and suddenly you are managing five different web UIs, remembering which port maps to which service, and praying the SD card doesn't die again.
+
+I hit that point last year. My home server was running Home Assistant, Pi-hole, and a handful of other services on a Debian VM. Config changes lived in my head. Backups were ad-hoc. Rebuilding the server after a failed disk was a weekend project, not an afternoon task.
+
+So I built [home-server-template](https://github.com/dimahc/home-server-template): an Infrastructure-as-Code repo that provisions and configures my entire homelab from a single `git clone`.
+
+## The architecture
+
+I split the system into four layers, each with a clear responsibility:
+
+1. **Base OS** — Debian, hardened and bootstrapped with a shell script.
+2. **Infrastructure** — Terraform for anything that needs an API: DNS records, cloud backups, tunnels.
+3. **Configuration management** — Ansible roles for host-level setup: firewall rules, users, Docker runtime, and service configuration.
+4. **Service runtime** — Docker Compose files for long-running containers.
+
+The key constraint is reproducibility. If the server dies, I should be able to rebuild it from this repo in under an hour. If I want to test a change, I spin up a sandbox VM instead of touching production.
+
+## The playbook
+
+The entry point is `ansible/playbooks/site.yml`. It defines three host groups — `all`, `remote_vps`, and `docker_hosts` — and applies roles with tags so I can run subsets:
+
+```yaml
+- name: Configure inventory nodes
+  hosts: all
+  become: true
+  tags: [base, common]
+  roles:
+    - common
+    - role: firewall
+      tags: [firewall, security]
+    - role: tailscale
+      tags: [tailscale, vpn, security]
+    - role: bluetooth
+      tags: [bluetooth]
+
+- name: Secure Dokploy Traefik on remote VPS
+  hosts: remote_vps
+  become: true
+  tags: [dokploytraefik, security]
+  roles:
+    - role: dokploy-traefik
+      tags: [dokploytraefik, traefik, security]
+
+- name: Deploy Docker apps on docker hosts
+  hosts: docker_hosts
+  become: true
+  tags: [docker, apps]
+  roles:
+    - role: traefik
+      tags: [traefik, proxy]
+    - role: pihole
+      tags: [pihole, dns]
+    - role: home-assistant
+      tags: [home-assistant, homeassistant]
+    - role: music-assistant
+      tags: [music-assistant, musicassistant, audio]
+    - role: cloudflare-tunnel
+      tags: [cloudflaretunnel, cloudflare, tunnel]
+    - role: alexa-skill
+      tags: [alexaskill, alexa, musicassistant]
+```
+
+This means I can run the whole stack with `ansible-playbook -i inventories/home/hosts.yml playbooks/site.yml`, or target a single service with `--tags home-assistant`.
+
+## The roles
+
+Each service is a self-contained Ansible role. The `common` role handles the base OS: locale, timezone, packages, Docker installation, and SSH hardening.
+
+```yaml
+- name: Ensure locale is present
+  community.general.locale_gen:
+    name: "{{ homelab_locale }}"
+    state: present
+
+- name: Install Docker Engine packages
+  ansible.builtin.package:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+  tags: [docker]
+
+- name: Configure SSH daemon
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    validate: "/usr/sbin/sshd -t -f %s"
+  loop:
+    - regexp: "^#?PermitRootLogin"
+      line: "PermitRootLogin {{ ssh_permit_root_login }}"
+    - regexp: "^#?PasswordAuthentication"
+      line: "PasswordAuthentication {{ ssh_password_authentication }}"
+  notify: Restart sshd
+  tags: [ssh, security]
+```
+
+The `traefik` role creates the Docker network, sets up `acme.json` with `0600` permissions for Let's Encrypt, templates the Compose file, and deploys with the `community.docker.docker_compose_v2` module:
+
+```yaml
+- name: Create acme.json with correct permissions
+  ansible.builtin.copy:
+    dest: "{{ traefik_acme_storage }}"
+    content: "{}\n"
+    force: false
+    mode: "0600"
+    owner: root
+    group: root
+
+- name: Deploy Traefik with Docker Compose v2
+  community.docker.docker_compose_v2:
+    project_src: "{{ traefik_dir }}"
+    files:
+      - docker-compose.yml
+    state: present
+    pull: always
+```
+
+The `firewall` role is straightforward UFW with variable port lists:
+
+```yaml
+- name: Set UFW default policy
+  community.general.ufw:
+    direction: incoming
+    policy: "{{ firewall_default_policy }}"
+
+- name: Allow TCP ports
+  community.general.ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop: "{{ firewall_allowed_tcp_ports }}"
+```
+
+## Environments
+
+I maintain three inventories under `ansible/inventories/`:
+
+- **sandbox** — disposable VMs for testing roles and Terraform modules.
+- **home** — the physical Debian host(s) in my apartment.
+- **remote** — an OVH VPS that backs up the lab and hosts public-facing services.
+
+Terraform mirrors this structure under `terraform/envs/`. Each environment is independent; I never mix sandbox and production state.
+
+## The network
+
+Tailscale is the backbone. Instead of punching holes in my firewall for every service, I run Tailscale on every node. The homelab, the VPS, my laptop, and my phone all sit on a private mesh. Admin interfaces are reachable only through Tailscale IPs — no public exposure needed.
+
+For n8n webhooks, I use Tailscale Funnel to expose a single path (`/webhook/*`) publicly while keeping the admin UI on the mesh. The ACL policy in the Tailscale admin console enables Funnel for all nodes:
+
+```json
+{
+  "nodeAttrs": [
+    {"target": ["*"], "attr": ["funnel"]}
+  ]
+}
+```
+
+## The tools
+
+### Terraform
+
+Terraform handles anything that talks to an external API. My current use case is small — mostly DNS records and the OVH VPS — but the structure is there to grow. I keep modules under `terraform/modules/` and environment configs under `terraform/envs/<name>/`.
+
+```bash
+cd terraform/envs/home
+terraform init
+terraform plan -var="homelab_name=home"
+terraform apply
+```
+
+### Ansible + Make
+
+Ansible is the workhorse. The `Makefile` wraps the most common commands so I don't have to remember inventory paths and vault arguments:
+
+```bash
+# Full deployment
+make deploy ENV=home
+
+# Only update Traefik
+make deploy-tags ENV=home TAGS=traefik
+
+# Dry run before applying
+make deploy-check ENV=home ARGS="--check --diff"
+
+# Run health checks
+make healthcheck ENV=home
+```
+
+The healthcheck playbook copies three shell scripts to the target, runs them, and cleans up:
+
+```yaml
+- name: Run system health check
+  tags: [system, always_check]
+  block:
+    - name: Copy system check script
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../../scripts/check-system.sh"
+        dest: /tmp/check-system.sh
+        mode: "0755"
+
+    - name: Execute system health check
+      ansible.builtin.command: /tmp/check-system.sh
+      register: system_check
+      changed_when: false
+```
+
+### Docker Compose
+
+Each Ansible role templates its Docker Compose configuration. The `traefik` role renders `docker-compose.yml` from a Jinja2 template and deploys it with `docker_compose_v2`. This keeps container definitions close to the code that deploys them.
+
+### Ansible Vault
+
+Secrets never touch the repo. I use Ansible Vault for API keys, Tailscale auth keys, and any sensitive variable. The vault file is gitignored and encrypted:
+
+```bash
+ansible-vault edit ansible/inventories/home/group_vars/all/vault.yml
+ansible-playbook -i inventories/home/hosts.yml playbooks/site.yml --ask-vault-pass
+```
+
+### The local override pattern
+
+I wanted the repo to be safe to make public, so all tracked inventory files contain placeholder values (`example.com`, `192.168.0.10`). My real values go in a gitignored `local.yml` that Ansible merges alphabetically:
+
+```
+ansible/inventories/home/group_vars/all/
+  vars.yml          ← tracked, placeholder values
+  ssh.yml           ← tracked, placeholder keys
+  vault.yml         ← gitignored, encrypted secrets
+  local.yml         ← gitignored, my real overrides
+```
+
+This means I can commit the skeleton without leaking my IPs or domains, and the merge is silent — no tracked files need to change.
+
+## The bootstrap process
+
+Setting up a fresh Debian node is a single script:
+
+```bash
+# On the fresh server
+curl -fsSL https://raw.githubusercontent.com/dimahc/home-server-template/main/scripts/bootstrap.sh | sudo bash
+```
+
+`bootstrap.sh` installs Docker Engine, Terraform, and Ansible via pipx. It is idempotent — running it twice does not break anything.
+
+After bootstrap, I create the local overrides, set up SSH keys, and run the playbook:
+
+```bash
+# 1. Create local overrides
+cp ansible/inventories/home/group_vars/all/local.yml.example \
+   ansible/inventories/home/group_vars/all/local.yml
+
+# 2. Deploy SSH keys and base configuration
+ansible-playbook -i inventories/home/hosts.yml playbooks/site.yml --tags common
+
+# 3. Deploy everything
+ansible-playbook -i inventories/home/hosts.yml playbooks/site.yml
+```
+
+For selective updates, I use tags. If I am only changing the firewall, I run `--tags firewall`. If I am testing a new Home Assistant integration, I run `--tags home-assistant`. This keeps iterations fast.
+
+## Security decisions
+
+I made a few non-negotiable choices early on:
+
+- **SSH keys only** — password authentication is disabled. I maintain two keys: one for my personal `admin` account and one for the `ansible` service account.
+- **Separate automation account** — the `ansible` user has passwordless sudo scoped to automation tasks. It is not my daily driver.
+- **Tailscale mesh** — no service is exposed to the public internet unless it absolutely needs to be. n8n webhooks are the exception, and they are locked to a single path via Funnel.
+- **Tagged Docker images** — I never use `:latest` in production. Every container runs a pinned version updated explicitly through Ansible.
+- **3-2-1 backups** — config directories are backed up daily to the remote VPS using restic. Terraform state lives in a remote backend. The playbooks themselves are the source of truth.
+
+## What I would do differently
+
+The repo is young. If I were starting over, I would:
+
+- Use **Docker Swarm** or **Kubernetes** instead of raw Compose files. Compose is fine for a handful of services, but scaling to twenty containers gets messy.
+- Add **Renovate** or **Dependabot** for automated container image updates. Right now I bump versions manually.
+- Move the health check scripts into a proper monitoring stack. I have shell scripts for system, Docker, and service checks, but they run on demand rather than on a schedule.
+
+## The payoff
+
+The real win is not the initial deployment — it is the rebuild. Last month, my home server SSD died. I ordered a replacement, ran `bootstrap.sh`, executed the playbook, and was back online in about 45 minutes. Before IaC, that would have been a weekend of remembering which ports were forwarded, which integrations were configured, and which Docker volumes mattered.
+
+Now it is a git log.
+
+If you are running more than three services on a home server, Infrastructure as Code is not overkill. It is the only way to stop treating your homelab like a pet and start treating it like cattle.
+
+The full source is on GitHub: [dimahc/home-server-template](https://github.com/dimahc/home-server-template).

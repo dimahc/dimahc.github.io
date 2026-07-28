@@ -1,45 +1,46 @@
 "use client";
 
-import { useLanguage } from "@/context";
+import { useParams } from "next/navigation";
 import { formatDate, formatNumber, t, tArray, tNamespace } from "@/lib/i18n";
 import { useCallback } from "react";
 
 export function useTranslation() {
-  const { language } = useLanguage();
+  const params = useParams();
+  const locale = (params?.locale as 'en' | 'fr') || 'fr';
 
   const translate = useCallback(
     (key: string, params?: Record<string, string | number>) => {
-      return t(language, key, params);
+      return t(locale, key, params);
     },
-    [language]
+    [locale]
   );
 
   const translateArray = useCallback(
     (key: string) => {
-      return tArray(language, key);
+      return tArray(locale, key);
     },
-    [language]
+    [locale]
   );
 
   const translateNamespace = useCallback(
     <T = any>(namespace: string): T => {
-      return tNamespace<T>(language, namespace);
+      return tNamespace<T>(locale, namespace);
     },
-    [language]
+    [locale]
   );
 
   const formatDateLocale = useCallback(
     (date: Date, options?: Intl.DateTimeFormatOptions) => {
-      return formatDate(date, language, options);
+      return formatDate(date, locale, options);
     },
-    [language]
+    [locale]
   );
 
   const formatNumberLocale = useCallback(
     (num: number, options?: Intl.NumberFormatOptions) => {
-      return formatNumber(num, language, options);
+      return formatNumber(num, locale, options);
     },
-    [language]
+    [locale]
   );
 
   return {
@@ -48,6 +49,6 @@ export function useTranslation() {
     tNamespace: translateNamespace,
     formatDate: formatDateLocale,
     formatNumber: formatNumberLocale,
-    language,
+    language: locale,
   };
 }
