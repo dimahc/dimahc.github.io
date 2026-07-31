@@ -31,35 +31,25 @@ ENV NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=$NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
 ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
 ENV NODE_ENV=production
 
-# Build the Next.js app (output: export generates /app/out)
+# Build the Next.js app
 RUN bun run build
 
-# Fix static export routing: copy .html files into same-named dirs as index.html
-# so static servers resolve clean URLs correctly.
-RUN find /app/out -type f -name "*.html" ! -name "index.html" ! -name "404.html" | while read -r f; do \
-      dir="${f%.html}"; \
-      mkdir -p "$dir"; \
-      cp "$f" "$dir/index.html"; \
-    done
 
-
-# Stage 3: Runner (serve static files)
+# Stage 3: Runner (serve with Next.js server)
 FROM oven/bun:1-alpine AS runner
 
 WORKDIR /app
 
-# Install serve to host static files
-RUN bun install -g serve
+# Copy built files from builder
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package.json ./
 
-# Copy built static files
-COPY --from=builder /app/out ./out
+# Install production dependencies
+RUN bun install --production
 
 # Expose port
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost:3000/ || exit 1
-
-# Serve static files on port 3000
-CMD ["serve", "out", "-l", "3000"]
+# Start Next.js server
+CMD ["bun", "run", "start"]
