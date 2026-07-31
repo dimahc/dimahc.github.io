@@ -12,14 +12,13 @@ export default function Nav() {
   const params = useParams()
   const locale = (params?.locale as string) || 'fr'
 
-  // French (default) uses root URLs, English uses /en/ prefix
-  const prefix = locale === 'fr' ? '' : `/${locale}`
+  const prefix = `/${locale}`
 
   return (
     <nav className="sticky top-0 z-20 bg-background/85 backdrop-blur-sm border-b border-line-soft">
       <div className="max-w-[920px] mx-auto px-8 flex items-center justify-between h-16">
         <div className="flex items-center gap-8">
-          <a href={prefix || '/'} className="font-bold text-[17px] tracking-tight hover:text-accent transition-colors shrink-0">
+          <a href={prefix} className="font-bold text-[17px] tracking-tight hover:text-accent transition-colors shrink-0">
             dimahc<span className="text-accent">.dev</span>
           </a>
           <div className="hidden sm:flex gap-7 text-sm text-muted">

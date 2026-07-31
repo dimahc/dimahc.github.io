@@ -11,7 +11,7 @@ export default function Footer() {
         <div className="flex items-center justify-between flex-wrap gap-5">
           <div>
             <div className="font-semibold text-base mb-1">{t('footer.cta')}</div>
-            <a href={`/${language}`} className="font-mono text-[12px] text-faint hover:text-accent transition-colors">dimahc.dev</a>
+            <a href={`/${language}/`} className="font-mono text-[12px] text-faint hover:text-accent transition-colors">dimahc.dev</a>
           </div>
           <div className="flex gap-[22px] text-sm">
             <a href="mailto:hello@dimahc.dev" className="text-muted hover:text-accent transition-colors inline-flex items-center gap-1.5">
