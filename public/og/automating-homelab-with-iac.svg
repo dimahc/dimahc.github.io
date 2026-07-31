@@ -18,17 +18,17 @@
 
   <!-- Title -->
   <text x="80" y="260" font-family="system-ui, -apple-system, sans-serif" font-size="42" font-weight="700" fill="#ece9e2" letter-spacing="-0.01">
-    Owning an open source Terraform provider
+    Automating a homelab with Terraform, Ansible, and Docker
   </text>
 
   <!-- Description -->
   <text x="80" y="320" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#a2a29a" letter-spacing="0">
-    A practical guide to the maintainer role — vigilance points, review processes, release workflows, and the constraints...
+    How I stopped clicking through web UIs and turned my home server into a reproducible, version-controlled infrastructu...
   </text>
 
   <!-- Date -->
   <text x="80" y="380" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#66675f">
-    Jun 18, 2025
+    Jul 28, 2026
   </text>
 
   <!-- Brand -->

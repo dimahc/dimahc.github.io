@@ -18,17 +18,17 @@
 
   <!-- Title -->
   <text x="80" y="260" font-family="system-ui, -apple-system, sans-serif" font-size="42" font-weight="700" fill="#ece9e2" letter-spacing="-0.01">
-    Owning an open source Terraform provider
+    How to build a Terraform provider
   </text>
 
   <!-- Description -->
   <text x="80" y="320" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#a2a29a" letter-spacing="0">
-    A practical guide to the maintainer role — vigilance points, review processes, release workflows, and the constraints...
+    A practical guide to developing a Terraform provider in Go — from project structure to release practices, focused on ...
   </text>
 
   <!-- Date -->
   <text x="80" y="380" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#66675f">
-    Jun 18, 2025
+    Jun 25, 2025
   </text>
 
   <!-- Brand -->

@@ -5,13 +5,27 @@
     <link>https://dimahc.dev</link>
     <description>Notes on distributed systems, observability, and things that broke in production.</description>
     <language>en</language>
-    <lastBuildDate>Tue, 28 Jul 2026 21:34:00 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 31 Jul 2026 18:25:45 GMT</lastBuildDate>
     <atom:link href="https://dimahc.dev/feed.xml" rel="self" type="application/rss+xml"/>
         <item>
+      <title>Automating a homelab with Terraform, Ansible, and Docker</title>
+      <link>https://dimahc.dev/writing/automating-homelab-with-iac</link>
+      <guid isPermaLink="true">https://dimahc.dev/writing/automating-homelab-with-iac</guid>
+      <description>How I stopped clicking through web UIs and turned my home server into a reproducible, version-controlled infrastructure — the tools, the services, and the commands I actually use.</description>
+      <pubDate>Tue, 28 Jul 2026 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>How to build a Terraform provider</title>
+      <link>https://dimahc.dev/writing/how-to-build-a-terraform-provider</link>
+      <guid isPermaLink="true">https://dimahc.dev/writing/how-to-build-a-terraform-provider</guid>
+      <description>A practical guide to developing a Terraform provider in Go — from project structure to release practices, focused on production-grade implementation details.</description>
+      <pubDate>Wed, 25 Jun 2025 00:00:00 GMT</pubDate>
+    </item>
+    <item>
       <title>Owning an open source Terraform provider</title>
       <link>https://dimahc.dev/writing/owning-an-open-source-terraform-provider</link>
       <guid isPermaLink="true">https://dimahc.dev/writing/owning-an-open-source-terraform-provider</guid>
-      <description>What I learned maintaining the Cloud Avenue provider end to end — from resource design to breaking-change discipline and community support.</description>
+      <description>A practical guide to the maintainer role — vigilance points, review processes, release workflows, and the constraints that define day-to-day open source infrastructure maintenance.</description>
       <pubDate>Wed, 18 Jun 2025 00:00:00 GMT</pubDate>
     </item>
     <item>

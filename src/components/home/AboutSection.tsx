@@ -11,9 +11,9 @@ const spaceGrotesk = Space_Grotesk({
 })
 
 export default function AboutSection() {
-  const { t } = useTranslation()
+  const { t, tArray } = useTranslation()
 
-  const paragraphs = t('about.paragraphs') as string[]
+  const paragraphs = tArray('about.paragraphs')
 
   return (
     <section id="about" className="py-16 border-t border-line-soft">
