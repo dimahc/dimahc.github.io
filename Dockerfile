@@ -62,4 +62,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD wget --quiet --tries=1 --spider http://localhost:3000/ || exit 1
 
 # Serve static files on port 3000
-CMD ["serve", "-s", "out", "-l", "3000"]
+CMD ["serve", "out", "-l", "3000"]
