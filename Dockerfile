@@ -31,6 +31,9 @@ ENV NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=$NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
 ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
 ENV NODE_ENV=production
 
+# Build the Next.js app (output: export generates /app/out)
+RUN bun run build
+
 
 # Stage 3: Runner (serve static files)
 FROM oven/bun:1-alpine AS runner
