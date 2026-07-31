@@ -34,6 +34,14 @@ ENV NODE_ENV=production
 # Build the Next.js app (output: export generates /app/out)
 RUN bun run build
 
+# Fix static export routing: copy .html files into same-named dirs as index.html
+# so static servers resolve clean URLs correctly.
+RUN find /app/out -type f -name "*.html" ! -name "index.html" ! -name "404.html" | while read -r f; do \
+      dir="${f%.html}"; \
+      mkdir -p "$dir"; \
+      cp "$f" "$dir/index.html"; \
+    done
+
 
 # Stage 3: Runner (serve static files)
 FROM oven/bun:1-alpine AS runner
